@@ -30,5 +30,5 @@ Aplikasi berbasis web untuk memudahkan pemilik rental PlayStation dalam mengatur
 ![PHP](https://img.shields.io/badge/-PHP-777BB4?logo=php&logoColor=white)  
 ![MySQL](https://img.shields.io/badge/-MySQL-4479A1?logo=mysql&logoColor=white)  
 ![Figma](https://img.shields.io/badge/-Figma-F24E1E?logo=figma&logoColor=white)  
-- MySQL  
+
 
