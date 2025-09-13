@@ -14,9 +14,9 @@ session_start();
   <!-- NAVBAR -->
   <header class="navbar">
     <div class="logo">
-        < href="#hero">
+        <a href="#hero">
             <img src="./assets/Logo.png">
-        
+        </a>
     </div>
     <nav>
       <ul>
