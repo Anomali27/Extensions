@@ -1,0 +1,211 @@
+/* Body Styling */
+.body {
+  background: linear-gradient(120deg, #0059b3, #009f8a, #2d2f55);
+  min-height: 665px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  width: 100%;
+  height: 500px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: #1a3f66;
+}
+
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row;
+  }
+}
+
+/* Left Panel */
+.left-panel {
+  flex: 1;
+  color: white;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative; 
+}
+
+.back-link {
+  position: absolute;
+  bottom: 20px; 
+  left: 20px;   
+  font-size: 14px;
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #dcd9ff;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.subtitle {
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+/* Outline Button */
+.btn-outline {
+  margin-bottom: 16px;
+  width: 130px;
+  padding: 13px;
+  background: white;
+  border: 2px solid #444444;
+  color: #444444;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-outline:hover {
+  background: #444444;
+  color: white;
+}
+
+/* Primary Button */
+.btn-primary {
+  width: 130px;
+  padding: 13px;
+  border: 2px solid white;
+  font-weight: 800;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: white;
+  color: #444444;
+}
+
+/* Right Panel */
+.right-panel {
+  flex: 1;
+  background: white;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Logo Styling */
+.logo-link {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.logo-img {
+  height: 60px;   /* bisa diubah sesuai ukuran logo */
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: none;
+  background: #e2e2e2;
+  color: #333;
+  outline: none;
+}
+
+.input:focus {
+  border: 2px solid #444444; 
+  background: #fff;
+}
+
+/* Login Button */
+.form-action {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-login {
+  width: 130px;
+  padding: 13px;
+  background: #444444;
+  color: white;
+  font-weight: 800;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-login:hover {
+  background: #1a3f66;  
+  color: #fff;
+}
+
+/* Register Text */
+.register-text {
+  text-align: center;
+  margin-top: 24px;
+  color: #666;
+  font-size: 14px;
+}
+
+.register-link {
+  font-weight: 800;
+  text-decoration: underline;
+  color: #444444;
+  transition: 0.3s;
+}
+
+.register-link:hover {
+  color: #666666;
+}

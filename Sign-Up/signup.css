@@ -1,0 +1,201 @@
+/* Body */
+.body {
+  background: linear-gradient(120deg, #0059b3, #009f8a, #2d2f55);
+  min-height: 665px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Container */
+.signup-container {
+  display: flex;
+  max-width: 1000px;
+  width: 100%;
+  height: 500px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.form-section {
+  background: white;
+  flex: 1;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top-left-radius: 24px;
+  border-bottom-left-radius: 24px;
+}
+
+/* Logo di panel kiri */
+.logo-link {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.logo-img {
+  height: 60px;  /* bisa disesuaikan */
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+
+.info-section {
+  background: #1a3f66; 
+  color: white;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
+  position: relative; 
+}
+
+.back-link {
+  position: absolute;
+  bottom: 20px;       
+  left: 80%;         
+  color: #fff;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #dcd9ff;
+}
+
+/* Typography */
+.label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.redirect-text {
+  margin-top: 20px;
+  color: #555;
+  font-size: 14px;
+}
+
+.redirect-link {
+  font-weight: 600;
+  text-decoration: underline;
+  color: #222;
+}
+
+.info-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.info-subtitle {
+  margin-bottom: 24px;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: none;
+  background: #e2e2e2;
+  color: #333;
+  outline: none;
+}
+
+.input:focus {
+  border: 2px solid #444444; 
+  background: #fff;
+}
+
+/* Buttons */
+.form-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* Tombol utama */
+.btn-submit {
+  width: 130px;
+  padding: 13px;
+  background: #444444; 
+  color: white;
+  margin-bottom: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-submit:hover {
+  background: #1a3f66;   /* box navy saat hover */
+  color: #fff;
+}
+
+
+.btn-light {
+  margin-bottom: 16px;
+  width: 130px;
+  padding: 13px;
+  background: white;
+  border: 2px solid #444444;
+  color: #444444;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-light:hover {
+  background: #444444;
+  color: white;
+}
+
+/* Tombol outline putih */
+.btn-outline {
+  width: 130px;
+  padding: 13px;
+  border: 2px solid white;
+  font-weight: 800;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-outline:hover {
+  background: white;
+  color: #444444;
+}
+
+/* Form Layout */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
