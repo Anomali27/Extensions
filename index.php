@@ -24,6 +24,7 @@ session_start();
         <li><a href="#available">Unit Tersedia</a></li>
         <li><a href="#pricing">Paket harga</a></li>
         <li><a href="../Unit/unit.php">Pesanan</a></li>
+        <li><a href="try.php">Dashboard</a></li>
       </ul>
     </nav>
     <div class="auth">
