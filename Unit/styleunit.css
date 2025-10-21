@@ -1,17 +1,14 @@
 
 
 :root {
-  --bg-page: #ffffff;     /* halaman putih penuh */
-  --panel: #f6f7f8;       /* area konten */
-  --accent: #0b62b7;      /* biru (booked) */
-  --available: #28a745;   /* hijau (available) */
+  --bg-page: #ffffff;     
+  --panel: #f6f7f8;       
+  --accent: #0b62b7;     
+  --available: #28a745;  
   --white: #ffffff;
   --text: #0b0b0b;
 }
 
-* {
-  box-sizing: border-box;
-}
 
 html,
 body {
@@ -24,16 +21,16 @@ body {
 
 /* ===== Layout ===== */
 .site-bg {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .page-wrap {
-  width: 100%;         /* penuh kanan-kiri */
-  max-width: none;     /* hapus batas max-width */
+  display: flex;
+  justify-content: space-between;        
+  max-width: none;  
   margin: 0;
-  border-radius: 0;    /* biar rata dengan sisi layar */
+  border-radius: 0;    
 }
 
 .units {
@@ -44,18 +41,18 @@ body {
 }
 
 .unit-column {
-  width: 32%;
+  width: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .unit-column.center {
-  width: 32%;
+  width: 200px;
 }
 
 .unit-column.right {
-  width: 20%;
+  width: 200px;
 }
 
 /* ===== Topbar ===== */
