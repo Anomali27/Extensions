@@ -1,0 +1,160 @@
+/* === RESET DAN GLOBAL === */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* === INFO CARD === */
+.info-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* === USER SECTION === */
+.user-section {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+}
+
+/* === SEARCH BAR & BUTTON GROUP === */
+.d-flex.gap-2 form input {
+    width: 220px;
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+}
+
+.d-flex.gap-2 form button {
+    height: 42px;
+    padding: 0 18px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.d-flex.gap-2 a.btn-success {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* === TABLE === */
+.table th {
+    background: #343a40;
+    color: white;
+}
+
+.table td {
+    background: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* === BUTTONS === */
+.btn-warning {
+    background-color: #ffc107;
+    border: none;
+    color: #212529;
+    font-weight: 500;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+}
+
+/* === MODAL STYLE === */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 10px;
+    width: 360px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+}
+
+.modal-content h3 {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #212529;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.modal-content button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.modal-content .btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-content .btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.modal-content .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-content .btn-secondary:hover {
+    background-color: #5a6268;
+}
