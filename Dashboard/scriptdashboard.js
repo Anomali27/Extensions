@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Dashboard loaded ✅");
 
-  // Animasi kecil untuk kartu statistik
+// Animasi kecil untuk kartu statistik
   const cards = document.querySelectorAll(".info-card");
   cards.forEach((card, i) => {
     card.style.opacity = 0;

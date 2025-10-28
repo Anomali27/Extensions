@@ -11,12 +11,12 @@ function showModal(message, success) {
   }, 2000);
 }
 
-// Efek transisi antar halaman
+// Efek transisi antar halaman (slide ke kiri dari signup ke login)
 document.querySelectorAll('.switch').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
     const container = document.querySelector('.container');
-    container.classList.add('slide-right');
+    container.classList.add('slide-left');
     setTimeout(() => {
       window.location.href = e.target.getAttribute('href');
     }, 500);

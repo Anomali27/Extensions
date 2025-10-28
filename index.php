@@ -28,8 +28,8 @@ session_start();
       </ul>
     </nav>
     <div class="auth">
-      <a href="../Login/login.php" class="login">Login</a>
-      <a href="../Sign-Up/signup.php" class="signup">Sign Up</a>
+      <a href="../Auth/auth.php?mode=login" class="login">Login</a>
+      <a href="../Auth/auth.php?mode=signup" class="signup">Sign Up</a>
     </div>
   </header>
 
@@ -154,8 +154,8 @@ session_start();
       <h2>Perhatian !!</h2>
       <p>Silakan login atau sign up terlebih dahulu sebelum memesan.</p>
       <div class="modal-actions">
-        <a href="./Login/login.php" class="btn-secondary">Login</a></button>
-        <a href="./Sign-Up/signup.php" class="btn-dark">Sign Up</a>
+        <a href="../Auth/auth.php?mode=login" class="btn-secondary">Login</a>
+        <a href="../Auth/auth.php?mode=signup" class="btn-dark">Sign Up</a>
       </div>
     </div>
   </div>

@@ -1,7 +1,6 @@
-/* ===== STYLE LOGIN ===== */
+/* ===== STYLE SIGNUP ===== */
 
-/* Warna utama abu-abu modern — ubah kalau mau */
-/* Misalnya ganti ke #1a3f66 untuk nuansa biru navy */
+/* Warna utama abu-abu modern — ubah di sini kalau mau tone lain */
 :root {
   --base-bg: linear-gradient(135deg, #d3d3d3, #b0bec5, #90a4ae);
   --panel-bg: #2f3e46;
@@ -38,7 +37,7 @@ body {
   transition: transform 0.6s ease-in-out;
 }
 
-/* Animasi slide masuk */
+/* Animasi slide */
 .container.slide-left {
   transform: translateX(-100%);
 }
@@ -55,14 +54,13 @@ body {
 }
 
 .left-panel {
-  background: #fff;
-  transition: all 0.8s ease;
+  background: var(--panel-bg);
+  color: white;
+  text-align: center;
 }
 
 .right-panel {
-  background: var(--panel-bg);
-  color: #fff;
-  text-align: center;
+  background: #fff;
   transition: all 0.8s ease;
 }
 
