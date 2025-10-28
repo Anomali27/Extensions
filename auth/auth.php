@@ -24,7 +24,7 @@ if (isset($_POST['login'])) {
                         timer: 2000,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = '../dashboard/index.php';
+                        window.location.href = '../../index.php';
                     });
                   </script>";
         } else {
