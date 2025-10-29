@@ -54,8 +54,15 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
   <div class="container mt-5">
-    <h1 class="text-center mb-4">🎮 Dashboard Pemesanan Billing PlayStation</h1>
+    <h1 class="text-center mb-4">
+      <div class="Homepage">
+        <a href="../../index.php" class="logo-link">
+          <img src="../assets/Logo.png" alt="logo" class="logo"/>
+        </a> Dashboard Pemesanan Billing PlayStation 
+      </div>
+    </h1>
 
     <!-- Statistik -->
     <div class="row text-center g-4 mb-4">

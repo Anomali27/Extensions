@@ -7,6 +7,24 @@ body {
     padding: 0;
 }
 
+.logo {
+  width: 180px;
+}
+
+/* ===== LOGO HOVER & CLICK EFFECT ===== */
+.logo-link {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.1);
+}
+
+.logo-link:active {
+  transform: scale(0.95);
+}
+
 /* === INFO CARD === */
 .info-card {
     background: #ffffff;
@@ -121,6 +139,7 @@ body {
     color: #212529;
 }
 
+
 .modal-content input {
     width: 100%;
     padding: 10px 12px;
@@ -157,4 +176,11 @@ body {
 
 .modal-content .btn-secondary:hover {
     background-color: #5a6268;
+}
+
+.Homepage{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
 }
