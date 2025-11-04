@@ -106,7 +106,7 @@ if (isset($_POST['signup'])) {
 <body>
     <div class="auth-container" id="authContainer">
         <!-- Panel Login -->
-        <div class="form-container login-container">
+        <div class="form-container login-container" id="SIGNIN">
             <form method="POST" action="">
                 <h2>Login</h2>
                 <input type="email" name="email" placeholder="Email" required>
@@ -117,7 +117,7 @@ if (isset($_POST['signup'])) {
         </div>
 
         <!-- Panel Sign Up -->
-        <div class="form-container signup-container">
+        <div class="form-container signup-container" id="SIGNUP">
             <form method="POST" action="">
                 <h2>Sign Up</h2>
                 <input type="text" name="username" placeholder="Username" required>
