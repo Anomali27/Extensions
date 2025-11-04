@@ -16,6 +16,8 @@ if (isset($_POST['login'])) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
             $_SESSION['user'] = $user['username'];
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_role'] = $user['role'];
             echo "<script>
                     window.onload = () => Swal.fire({
                         icon: 'success',
@@ -106,7 +108,7 @@ if (isset($_POST['signup'])) {
 <body>
     <div class="auth-container" id="authContainer">
         <!-- Panel Login -->
-        <div class="form-container login-container" id="SIGNIN">
+        <div class="form-container login-container">
             <form method="POST" action="">
                 <h2>Login</h2>
                 <input type="email" name="email" placeholder="Email" required>
@@ -117,7 +119,7 @@ if (isset($_POST['signup'])) {
         </div>
 
         <!-- Panel Sign Up -->
-        <div class="form-container signup-container" id="SIGNUP">
+        <div class="form-container signup-container">
             <form method="POST" action="">
                 <h2>Sign Up</h2>
                 <input type="text" name="username" placeholder="Username" required>

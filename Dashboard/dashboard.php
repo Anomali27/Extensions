@@ -2,6 +2,32 @@
 require_once __DIR__ . '/../config/config.php';
 session_start();
 
+// 🔒 Proteksi hanya admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    echo "<!doctype html>
+<html lang='id'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>Akses Ditolak</title>
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+</head>
+<body>
+<script>
+window.onload = () => Swal.fire({
+    icon: 'error',
+    title: 'Akses Ditolak!',
+    text: 'Anda bukan admin.',
+    confirmButtonColor: '#d33'
+}).then(() => {
+    window.location.href = '../index.php';
+});
+</script>
+</body>
+</html>";
+    exit;
+}
+
 // --- Inisialisasi ---
 $totalUser = 0;
 $userOnline = 0;
