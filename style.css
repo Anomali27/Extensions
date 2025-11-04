@@ -6,10 +6,17 @@
   font-family: "Poppins", sans-serif;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   background: #f7f9fc;
   color: #333;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* === NAVBAR === */
@@ -332,7 +339,7 @@ footer {
   color: white;
   text-align: center;
   padding: 20px;
-  margin-top: 50px;
+  margin-top: auto;
 }
 
 /* === RESPONSIVE === */
