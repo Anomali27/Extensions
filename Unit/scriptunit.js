@@ -43,11 +43,16 @@ function initializeEventListeners() {
     // Time selection buttons - use event delegation
     const timeSelection = document.querySelector('.time-selection');
     if (timeSelection) {
+        console.log('Time selection element found, adding event listener');
         timeSelection.addEventListener('click', function(e) {
+            console.log('Click detected on time-selection', e.target);
             if (e.target.classList.contains('time-btn')) {
+                console.log('Time button clicked:', e.target.dataset.time);
                 handleTimeButtonClick(e.target);
             }
         });
+    } else {
+        console.error('Time selection element not found');
     }
 
     // Duration controls
@@ -202,10 +207,15 @@ function handleTimeButtonClick(button) {
     // Check if button is disabled
     if (button.disabled) return;
 
-    // Toggle selected class on this button only
-    button.classList.toggle('selected');
+    // Remove selected class from all buttons
+    document.querySelectorAll('.time-btn.selected').forEach(btn => {
+        btn.classList.remove('selected');
+    });
 
-    // Update hidden input with selected times
+    // Add selected class to clicked button
+    button.classList.add('selected');
+
+    // Update hidden input with selected time
     updateSelectedTimes();
     console.log('Button clicked:', button.dataset.time, 'Selected:', button.classList.contains('selected'));
 }
@@ -247,14 +257,20 @@ function updateAvailableTimes() {
     const startDateInput = document.getElementById('startDate');
     const roomIdInput = document.getElementById('roomId');
 
-    if (!durationInput || !startDateInput || !roomIdInput) return;
+    if (!durationInput || !startDateInput || !roomIdInput) {
+        console.log('Missing input elements for updateAvailableTimes');
+        return;
+    }
 
     const duration = parseFloat(durationInput.value) || 0;
     const selectedDate = startDateInput.value;
     const roomId = roomIdInput.value;
     const timeButtons = document.querySelectorAll('.time-btn');
 
+    console.log('updateAvailableTimes called:', { duration, selectedDate, roomId, timeButtonsLength: timeButtons.length });
+
     if (!selectedDate || duration <= 0 || !roomId) {
+        console.log('Showing all times as available (missing params)');
         // Show all times if no date, duration, or room selected
         timeButtons.forEach(btn => {
             btn.classList.remove('disabled', 'booked');
@@ -264,9 +280,14 @@ function updateAvailableTimes() {
     }
 
     // Fetch existing bookings for this room and date
+    console.log('Fetching bookings for room:', roomId, 'date:', selectedDate);
     fetch(`get_bookings.php?room_id=${roomId}&date=${selectedDate}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('Fetch response status:', response.status);
+            return response.json();
+        })
         .then(bookings => {
+            console.log('Bookings received:', bookings);
             const now = new Date();
             const selectedDateObj = new Date(selectedDate);
 
@@ -296,6 +317,8 @@ function updateAvailableTimes() {
 
                 // Disable if end time is after 24:00 (next day)
                 const isOvernight = endDateTime.getDate() !== startDateTime.getDate();
+
+                console.log(`Time ${startTime}: isPast=${isPastTime}, isOvernight=${isOvernight}, isBooked=${isBooked}`);
 
                 if (isPastTime || isOvernight) {
                     btn.classList.add('disabled');

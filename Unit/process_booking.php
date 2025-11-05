@@ -21,7 +21,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 
 $room_id = $data['roomId'];
 $start_date = $data['startDate'];
-$start_times = explode(',', $data['startTime']); // Multiple start times
+$start_times = explode(',', $data['startTime']); // Single start time now
 $duration_hours = floatval($data['duration']); // Duration in hours
 $duration_minutes = $duration_hours * 60; // Convert to minutes for DB
 $package = $data['package'];
@@ -39,12 +39,11 @@ if ($room['status'] !== 'available') {
     exit;
 }
 
-// Insert bookings for each selected time
+// Insert booking for the selected time (single selection now)
 $success = true;
-foreach ($start_times as $start_time) {
-    $start_time = trim($start_time);
-    if (empty($start_time)) continue;
+$start_time = trim($start_times[0]); // Only one time now
 
+if (!empty($start_time)) {
     // Check for conflicts with existing bookings
     $query = $connection->prepare("
         SELECT id FROM orders
@@ -56,7 +55,8 @@ foreach ($start_times as $start_time) {
 
     if ($result->num_rows > 0) {
         $success = false;
-        break;
+        echo json_encode(['success' => false, 'message' => 'Time slot already booked']);
+        exit;
     }
 
     // Insert booking
@@ -65,8 +65,11 @@ foreach ($start_times as $start_time) {
 
     if (!$query->execute()) {
         $success = false;
-        break;
     }
+} else {
+    $success = false;
+    echo json_encode(['success' => false, 'message' => 'No time selected']);
+    exit;
 }
 
 if ($success) {

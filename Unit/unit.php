@@ -71,42 +71,105 @@ while ($row = $query->fetch_assoc()) {
 
     <!-- UNIT ROOMS -->
     <section id="unit" class="unit section">
-        <h2>Unit Tersedia</h2>
+
         <div class="unit-types">
-            <h3>PlayStation 5</h3>
-            <div class="rooms-grid">
-                <?php foreach ($rooms as $room): ?>
-                    <?php if ($room['type'] == 'PS5'): ?>
-                        <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="PS5" data-room-name="<?php echo $room['name']; ?>">
-                            <h4><?php echo $room['name']; ?></h4>
-                            <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+            <!-- PlayStation 5 Section -->
+            <div class="unit-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <img src="../assets/PS5.png" alt="PS5" class="console-icon">
+                    </div>
+                    <div class="category-info">
+                        <h3>PlayStation 5</h3>
+                        <p>Experience next-gen gaming with ultra-fast SSD and stunning graphics</p>
+                    </div>
+                </div>
+                <div class="rooms-grid">
+                    <?php foreach ($rooms as $room): ?>
+                        <?php if ($room['type'] == 'PS5'): ?>
+                            <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="PS5" data-room-name="<?php echo $room['name']; ?>">
+                                <div class="room-icon">
+                                    <img src="../assets/PS5.png" alt="PS5" class="room-console-icon">
+                                </div>
+                                <h4><?php echo $room['name']; ?></h4>
+                                <div class="room-status">
+                                    <span class="status-indicator <?php echo $room['status']; ?>"></span>
+                                    <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
+                                </div>
+                                <div class="room-features">
+                                    <span class="feature-tag">4K Gaming</span>
+                                    <span class="feature-tag">Ray Tracing</span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
-            <h3>PlayStation 4</h3>
-            <div class="rooms-grid">
-                <?php foreach ($rooms as $room): ?>
-                    <?php if ($room['type'] == 'PS4'): ?>
-                        <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="PS4" data-room-name="<?php echo $room['name']; ?>">
-                            <h4><?php echo $room['name']; ?></h4>
-                            <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+            <!-- PlayStation 4 Section -->
+            <div class="unit-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <img src="../assets/PS4.png" alt="PS4" class="console-icon">
+                    </div>
+                    <div class="category-info">
+                        <h3>PlayStation 4</h3>
+                        <p>Classic gaming experience with thousands of games available</p>
+                    </div>
+                </div>
+                <div class="rooms-grid">
+                    <?php foreach ($rooms as $room): ?>
+                        <?php if ($room['type'] == 'PS4'): ?>
+                            <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="PS4" data-room-name="<?php echo $room['name']; ?>">
+                                <div class="room-icon">
+                                    <img src="../assets/PS4.png" alt="PS4" class="room-console-icon">
+                                </div>
+                                <h4><?php echo $room['name']; ?></h4>
+                                <div class="room-status">
+                                    <span class="status-indicator <?php echo $room['status']; ?>"></span>
+                                    <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
+                                </div>
+                                <div class="room-features">
+                                    <span class="feature-tag">1080p</span>
+                                    <span class="feature-tag">HDR</span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
-            <h3>VR</h3>
-            <div class="rooms-grid">
-                <?php foreach ($rooms as $room): ?>
-                    <?php if ($room['type'] == 'VR'): ?>
-                        <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="VR" data-room-name="<?php echo $room['name']; ?>">
-                            <h4><?php echo $room['name']; ?></h4>
-                            <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+            <!-- VR Section -->
+            <div class="unit-category">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <img src="../assets/VR.png" alt="VR" class="console-icon">
+                    </div>
+                    <div class="category-info">
+                        <h3>Virtual Reality</h3>
+                        <p>Immerse yourself in virtual worlds with cutting-edge VR technology</p>
+                    </div>
+                </div>
+                <div class="rooms-grid">
+                    <?php foreach ($rooms as $room): ?>
+                        <?php if ($room['type'] == 'VR'): ?>
+                            <div class="room-card <?php echo $room['status'] == 'booked' ? 'booked' : 'available'; ?>" data-room-id="<?php echo $room['id']; ?>" data-type="VR" data-room-name="<?php echo $room['name']; ?>">
+                                <div class="room-icon">
+                                    <img src="../assets/VR.png" alt="VR" class="room-console-icon">
+                                </div>
+                                <h4><?php echo $room['name']; ?></h4>
+                                <div class="room-status">
+                                    <span class="status-indicator <?php echo $room['status']; ?>"></span>
+                                    <p><?php echo $room['status'] == 'available' ? 'Tersedia' : 'Dipesan'; ?></p>
+                                </div>
+                                <div class="room-features">
+                                    <span class="feature-tag">VR Ready</span>
+                                    <span class="feature-tag">Motion Control</span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </section>
