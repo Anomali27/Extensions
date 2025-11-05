@@ -98,7 +98,7 @@ while ($row = $query->fetch_assoc()) {
                                 </div>
                                 <div class="room-features">
                                     <span class="feature-tag">4K Gaming</span>
-                                    <span class="feature-tag">Ray Tracing</span>
+                                    <span class="feature-tag">Visual ultra-realistis</span>
                                 </div>
                             </div>
                         <?php endif; ?>

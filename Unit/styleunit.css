@@ -429,11 +429,10 @@
   border-color: #cbd5e1;
 }
 
-.time-btn.selected {
-  background: #10b981;
-  color: white;
-  border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+/* === 🔹 STYLE UNTUK JAM MULAI YANG DIPILIH === */
+.time-btn.active {
+    background-color: #4f46e5 !important; /* Ungu */
+    color: white !important;
 }
 
 .time-btn.disabled {

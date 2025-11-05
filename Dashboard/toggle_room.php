@@ -21,7 +21,7 @@ if (!$roomId || !$newStatus) {
 }
 
 // Validate status
-if (!in_array($newStatus, ['available', 'unavailable'])) {
+if (!in_array($newStatus, ['available', 'booked'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid status']);
     exit;
 }

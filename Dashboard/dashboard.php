@@ -276,7 +276,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                   <td><?= htmlspecialchars($row['name']) ?></td>
                   <td><?= htmlspecialchars($row['type']) ?></td>
                   <td>
-                    <span class="badge bg-<?= $row['status'] == 'available' ? 'success' : 'danger' ?>">
+                    <span class="badge bg-<?= $row['status'] == 'available' ? 'success' : ($row['status'] == 'booked' ? 'warning' : 'danger') ?>">
                       <?= ucfirst($row['status']) ?>
                     </span>
                   </td>
@@ -284,7 +284,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                     <button class="btn btn-warning btn-sm btnToggleRoom"
                             data-id="<?= $row['id'] ?>"
                             data-status="<?= $row['status'] ?>">
-                      <?= $row['status'] == 'available' ? 'Set Unavailable' : 'Set Available' ?>
+                      <?= $row['status'] == 'available' ? 'Set Booked' : 'Set Available' ?>
                     </button>
                   </td>
                 </tr>
@@ -467,7 +467,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     btn.addEventListener('click', function() {
       const roomId = this.dataset.id;
       const currentStatus = this.dataset.status;
-      const newStatus = currentStatus === 'available' ? 'unavailable' : 'available';
+      const newStatus = currentStatus === 'available' ? 'booked' : 'available';
 
       Swal.fire({
         title: `Set Room ${newStatus}?`,

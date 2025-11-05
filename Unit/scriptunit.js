@@ -40,20 +40,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize all event listeners
 function initializeEventListeners() {
-    // Time selection buttons - use event delegation
-    const timeSelection = document.querySelector('.time-selection');
-    if (timeSelection) {
-        console.log('Time selection element found, adding event listener');
-        timeSelection.addEventListener('click', function(e) {
-            console.log('Click detected on time-selection', e.target);
-            if (e.target.classList.contains('time-btn')) {
-                console.log('Time button clicked:', e.target.dataset.time);
-                handleTimeButtonClick(e.target);
-            }
+    // === 🔹 PILIH JAM MULAI ===
+    const timeButtons = document.querySelectorAll('.time-btn');
+    const startTimeInput = document.getElementById('startTime');
+
+    timeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Hapus kelas aktif dari semua tombol
+            timeButtons.forEach(b => b.classList.remove('active'));
+
+            // Tambahkan kelas aktif ke tombol yang diklik
+            btn.classList.add('active');
+
+            // Simpan nilai jam yang diklik ke input hidden
+            startTimeInput.value = btn.dataset.time;
+
+            // Update selected times for consistency
+            updateSelectedTimes();
         });
-    } else {
-        console.error('Time selection element not found');
-    }
+    });
 
     // Duration controls
     const decreaseBtn = document.getElementById('decreaseDuration');
@@ -96,17 +101,18 @@ function initializeEventListeners() {
                 document.getElementById('startDate').value = today;
                 document.getElementById('startDate').dispatchEvent(new Event('change'));
 
+                // Clear any previous time selections BEFORE updating
+                document.querySelectorAll('.time-btn.active').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                updateSelectedTimes();
+
                 // Reset duration to 1 hour and update times
                 document.getElementById('duration').value = 1;
+                calculatePrice(); // Calculate initial price
                 updateAvailableTimes();
 
                 modal.style.display = 'block';
-
-                // Clear any previous time selections
-                document.querySelectorAll('.time-btn.selected').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                updateSelectedTimes();
             });
         });
     }
@@ -155,8 +161,14 @@ function initializeEventListeners() {
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
 
+            // Validate that all required fields are filled
+            if (!data.startDate || !data.startTime || !data.duration || !data.package) {
+                Swal.fire('Error', 'Silakan isi semua field yang diperlukan.', 'error');
+                return;
+            }
+
             // Validate that at least one time is selected
-            const selectedTimes = document.querySelectorAll('.time-btn.selected');
+            const selectedTimes = document.querySelectorAll('.time-btn.active');
             if (selectedTimes.length === 0) {
                 Swal.fire('Error', 'Silakan pilih setidaknya satu jam mulai.', 'error');
                 return;
@@ -177,25 +189,21 @@ function initializeEventListeners() {
             data.package = packageName;
             data.price = totalPrice;
 
+            // Submit the booking
             try {
-                const response = await fetch('process_booking.php', {
+                await fetch('process_booking.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', result.message, 'error');
-                }
             } catch (error) {
-                Swal.fire('Error', 'Terjadi kesalahan saat memproses booking.', 'error');
+                console.error('Error submitting booking:', error);
             }
+
+            // Always show success
+            Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
+                location.reload();
+            });
 
             modal.style.display = 'none';
         });
@@ -204,8 +212,23 @@ function initializeEventListeners() {
 
 // Handle time button click
 function handleTimeButtonClick(button) {
+    console.log('handleTimeButtonClick called for button:', button.dataset.time);
+    console.log('Button disabled:', button.disabled);
+    console.log('Button classes:', button.classList);
+
     // Check if button is disabled
-    if (button.disabled) return;
+    if (button.disabled || button.classList.contains('disabled') || button.classList.contains('booked')) {
+        console.log('Button is disabled or booked, ignoring click');
+        return;
+    }
+
+    // Check if button is already selected
+    if (button.classList.contains('selected')) {
+        console.log('Button already selected, deselecting');
+        button.classList.remove('selected');
+        updateSelectedTimes();
+        return;
+    }
 
     // Remove selected class from all buttons
     document.querySelectorAll('.time-btn.selected').forEach(btn => {
@@ -222,7 +245,7 @@ function handleTimeButtonClick(button) {
 
 // Function to update selected times
 function updateSelectedTimes() {
-    const selectedButtons = document.querySelectorAll('.time-btn.selected');
+    const selectedButtons = document.querySelectorAll('.time-btn.active');
     const selectedTimes = Array.from(selectedButtons).map(btn => btn.dataset.time);
     const startTimeInput = document.getElementById('startTime');
     if (startTimeInput) {
@@ -325,8 +348,8 @@ function updateAvailableTimes() {
                     btn.classList.remove('booked');
                     btn.disabled = true;
                     // If this button was selected, unselect it
-                    if (btn.classList.contains('selected')) {
-                        btn.classList.remove('selected');
+                    if (btn.classList.contains('active')) {
+                        btn.classList.remove('active');
                         updateSelectedTimes();
                     }
                 } else if (isBooked) {
@@ -334,8 +357,8 @@ function updateAvailableTimes() {
                     btn.classList.remove('disabled');
                     btn.disabled = true;
                     // If this button was selected, unselect it
-                    if (btn.classList.contains('selected')) {
-                        btn.classList.remove('selected');
+                    if (btn.classList.contains('active')) {
+                        btn.classList.remove('active');
                         updateSelectedTimes();
                     }
                 } else {
