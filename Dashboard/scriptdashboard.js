@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+
+
+
 // === POPUP MODAL TAMBAH USER ===
 document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("modalAddUser");
@@ -71,90 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// === POPUP EDIT USER ===
-document.addEventListener("DOMContentLoaded", () => {
-  // Buat modal edit dinamis (tidak perlu di HTML)
-  const modalEdit = document.createElement("div");
-  modalEdit.classList.add("modal");
-  modalEdit.id = "modalEditUser";
-  modalEdit.innerHTML = `
-    <div class="modal-content">
-      <h3>Edit User</h3>
-      <form id="editUserForm">
-        <input type="hidden" name="id" id="editUserId">
-        <input type="text" name="username" id="editUsername" placeholder="Username" required>
-        <input type="email" name="email" id="editEmail" placeholder="Email" required>
-        <input type="password" name="password" id="editPassword" placeholder="Password (kosongkan jika tidak diubah)">
-        <div class="btn-group">
-          <button type="submit" class="btn-primary">Simpan</button>
-          <button type="button" class="btn-secondary" id="closeEditModal">Batal</button>
-        </div>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modalEdit);
 
-  // Fungsi buka modal edit
-  document.querySelectorAll(".btnEdit").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const id = btn.dataset.id;
-
-      try {
-        const res = await fetch(`get_user.php?id=${id}`);
-        const data = await res.json();
-
-        if (data) {
-          document.getElementById("editUserId").value = data.id;
-          document.getElementById("editUsername").value = data.username;
-          document.getElementById("editEmail").value = data.email;
-          modalEdit.style.display = "flex";
-        }
-      } catch (err) {
-        Swal.fire("Gagal!", "Tidak dapat mengambil data user.", "error");
-      }
-    });
-  });
-
-  // Submit form edit user via AJAX
-  document.addEventListener("submit", async (e) => {
-    if (e.target.id === "editUserForm") {
-      e.preventDefault();
-
-      const formData = new FormData(e.target);
-
-      try {
-        const res = await fetch("edit_user.php", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await res.text();
-        console.log("Edit Response:", result);
-
-        Swal.fire({
-          title: "Sukses!",
-          text: "Data user berhasil diperbarui ✅",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
-        modalEdit.style.display = "none";
-        setTimeout(() => location.reload(), 1600);
-      } catch (err) {
-        Swal.fire("Error", "Gagal mengedit user!", "error");
-      }
-    }
-  });
-
-  // Tutup modal edit
-  document.addEventListener("click", (e) => {
-    if (e.target.id === "closeEditModal" || e.target === modalEdit) {
-      modalEdit.style.display = "none";
-    }
-  });
-});
 
 // === POPUP EDIT USER ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -192,6 +113,162 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tutup modal jika klik di luar form
   window.addEventListener("click", (e) => {
     if (e.target === modalEdit) modalEdit.style.display = "none";
+  });
+});
+
+// === BOOKING MANAGEMENT ===
+document.addEventListener("DOMContentLoaded", () => {
+  // Edit Booking Time
+  document.querySelectorAll('.btnEditBooking').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const bookingId = this.dataset.id;
+      const currentDate = this.dataset.date;
+      const currentTime = this.dataset.time;
+      const currentDuration = this.dataset.duration;
+
+      Swal.fire({
+        title: 'Edit Booking Time',
+        html: `
+          <input type="date" id="newDate" class="swal2-input" value="${currentDate}" min="${new Date().toISOString().split('T')[0]}">
+          <input type="time" id="newTime" class="swal2-input" value="${currentTime}">
+          <input type="number" id="newDuration" class="swal2-input" value="${currentDuration / 60}" min="0.5" step="0.5" placeholder="Duration in hours">
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        preConfirm: () => {
+          const newDate = document.getElementById('newDate').value;
+          const newTime = document.getElementById('newTime').value;
+          const newDuration = document.getElementById('newDuration').value;
+
+          if (!newDate || !newTime || !newDuration) {
+            Swal.showValidationMessage('All fields are required');
+            return false;
+          }
+
+          return { newDate, newTime, newDuration };
+        }
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch('update_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId: bookingId,
+              newDate: result.value.newDate,
+              newTime: result.value.newTime,
+              newDuration: result.value.newDuration * 60
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Success', 'Booking updated successfully', 'success').then(() => location.reload());
+            } else {
+              Swal.fire('Error', data.message, 'error');
+            }
+          });
+        }
+      });
+    });
+  });
+
+  // Cancel Booking
+  document.querySelectorAll('.btnCancelBooking').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const bookingId = this.dataset.id;
+
+      Swal.fire({
+        title: 'Cancel Booking?',
+        text: 'This will cancel the booking permanently.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Cancel',
+        cancelButtonText: 'No'
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch('cancel_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: bookingId })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Success', 'Booking cancelled successfully', 'success').then(() => location.reload());
+            } else {
+              Swal.fire('Error', data.message, 'error');
+            }
+          });
+        }
+      });
+    });
+  });
+
+  // Delete Booking
+  document.querySelectorAll('.btnDeleteBooking').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const bookingId = this.dataset.id;
+
+      Swal.fire({
+        title: 'Delete Booking?',
+        text: 'This will permanently delete the booking from the database.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'No'
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch('delete_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: bookingId })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Success', 'Booking deleted successfully', 'success').then(() => location.reload());
+            } else {
+              Swal.fire('Error', data.message, 'error');
+            }
+          });
+        }
+      });
+    });
+  });
+
+  // === ROOM MANAGEMENT ===
+  // Toggle Room Status
+  document.querySelectorAll('.btnToggleRoom').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const roomId = this.dataset.id;
+      const currentStatus = this.dataset.status;
+      const newStatus = currentStatus === 'available' ? 'booked' : 'available';
+
+      Swal.fire({
+        title: `Set Room ${newStatus}?`,
+        text: `This will change the room status to ${newStatus}.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch('toggle_room.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId: roomId, newStatus: newStatus })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Success', `Room status updated to ${newStatus}`, 'success').then(() => location.reload());
+            } else {
+              Swal.fire('Error', data.message, 'error');
+            }
+          });
+        }
+      });
+    });
   });
 });
 

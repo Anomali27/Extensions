@@ -214,36 +214,43 @@ function initializeEventListeners() {
 
             // Submit the booking
             try {
-                await fetch('process_booking.php', {
+                const response = await fetch('process_booking.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update room card to booked state immediately
+                    const roomCard = document.querySelector(`.room-card[data-room-id="${data.roomId}"]`);
+                    if (roomCard) {
+                        roomCard.classList.remove('available');
+                        roomCard.classList.add('booked');
+                        const statusIndicator = roomCard.querySelector('.status-indicator');
+                        const statusText = roomCard.querySelector('p');
+                        if (statusIndicator) {
+                            statusIndicator.classList.remove('available');
+                            statusIndicator.classList.add('booked');
+                        }
+                        if (statusText) {
+                            statusText.textContent = 'Dipesan';
+                        }
+                    }
+
+                    // Close modal and show success, then redirect to orders page
+                    modal.style.display = 'none';
+                    Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
+                        window.location.href = 'orders.php';
+                    });
+                } else {
+                    Swal.fire('Error', result.message || 'Gagal membuat booking', 'error');
+                }
             } catch (error) {
                 console.error('Error submitting booking:', error);
+                Swal.fire('Error', 'Terjadi kesalahan saat memproses booking', 'error');
             }
-
-            // Update room card to booked state immediately
-            const roomCard = document.querySelector(`.room-card[data-room-id="${data.roomId}"]`);
-            if (roomCard) {
-                roomCard.classList.remove('available');
-                roomCard.classList.add('booked');
-                const statusIndicator = roomCard.querySelector('.status-indicator');
-                const statusText = roomCard.querySelector('p');
-                if (statusIndicator) {
-                    statusIndicator.classList.remove('available');
-                    statusIndicator.classList.add('booked');
-                }
-                if (statusText) {
-                    statusText.textContent = 'Dipesan';
-                }
-            }
-
-            // Close modal and show success, then redirect to orders page
-            modal.style.display = 'none';
-            Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
-                window.location.href = 'orders.php';
-            });
         });
     }
 }
@@ -518,40 +525,57 @@ function updateStopwatch() {
 }
 
 function startSession(bookingId) {
-    const startTime = Date.now();
-    localStorage.setItem(`start_${bookingId}`, startTime);
+    // Send request to server to record start time
+    fetch('start_session.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: bookingId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Store start time locally for countdown
+            localStorage.setItem(`start_${bookingId}`, Date.now());
 
-    // Hide start button and show stop button
-    const stopwatch = document.querySelector(`.stopwatch[data-booking-id="${bookingId}"]`);
-    stopwatch.querySelector('.start-btn').style.display = 'none';
+            // Hide start button and show stop button
+            const stopwatch = document.querySelector(`.stopwatch[data-booking-id="${bookingId}"]`);
+            stopwatch.querySelector('.start-btn').style.display = 'none';
 
-    // Add stop button if not exists
-    if (!stopwatch.querySelector('.stop-btn')) {
-        const stopBtn = document.createElement('button');
-        stopBtn.className = 'stop-btn';
-        stopBtn.textContent = 'Stop';
-        stopBtn.onclick = () => stopSession(bookingId);
-        stopwatch.appendChild(stopBtn);
-    }
+            // Add stop button if not exists
+            if (!stopwatch.querySelector('.stop-btn')) {
+                const stopBtn = document.createElement('button');
+                stopBtn.className = 'stop-btn';
+                stopBtn.textContent = 'Stop';
+                stopBtn.onclick = () => stopSession(bookingId);
+                stopwatch.appendChild(stopBtn);
+            }
 
-    // Calculate and show end time
-    const duration = parseInt(stopwatch.dataset.duration);
-    const endTime = new Date(startTime + duration * 60 * 1000);
-    const endTimeStr = endTime.toLocaleString('id-ID', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+            // Calculate and show end time
+            const duration = parseInt(stopwatch.dataset.duration);
+            const endTime = new Date(Date.now() + duration * 60 * 1000);
+            const endTimeStr = endTime.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-    // Show notification
-    Swal.fire({
-        title: 'Sesi Dimulai!',
-        text: `Sesi akan selesai pada: ${endTimeStr}`,
-        icon: 'success',
-        timer: 3000,
-        showConfirmButton: false
+            // Show notification
+            Swal.fire({
+                title: 'Sesi Dimulai!',
+                text: `Sesi akan selesai pada: ${endTimeStr}`,
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire('Error', data.message || 'Failed to start session', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error starting session:', error);
+        Swal.fire('Error', 'Failed to start session', 'error');
     });
 }
 

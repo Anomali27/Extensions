@@ -214,6 +214,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 FROM orders o
                 JOIN users u ON o.user_id = u.id
                 JOIN rooms r ON o.room_id = r.id
+                WHERE o.status IN ('active', 'pending')
                 ORDER BY o.start_date DESC, o.start_time DESC
                 LIMIT 50
               ");
@@ -240,14 +241,17 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                             data-duration="<?= $row['duration'] ?>">
                       Edit Time
                     </button>
-                    <button class="btn btn-danger btn-sm btnCancelBooking" data-id="<?= $row['id'] ?>">
+                    <button class="btn btn-warning btn-sm btnCancelBooking" data-id="<?= $row['id'] ?>">
                       Cancel
+                    </button>
+                    <button class="btn btn-danger btn-sm btnDeleteBooking" data-id="<?= $row['id'] ?>">
+                      Delete
                     </button>
                   </td>
                 </tr>
               <?php endwhile; ?>
               <?php else: ?>
-                <tr><td colspan="8" class="text-muted">No bookings found.</td></tr>
+                <tr><td colspan="8" class="text-muted">No active bookings found.</td></tr>
               <?php endif; ?>
             </tbody>
           </table>
@@ -374,127 +378,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     });
   });
 
-  // === BOOKING MANAGEMENT ===
-  // Edit Booking Time
-  document.querySelectorAll('.btnEditBooking').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const bookingId = this.dataset.id;
-      const currentDate = this.dataset.date;
-      const currentTime = this.dataset.time;
-      const currentDuration = this.dataset.duration;
 
-      Swal.fire({
-        title: 'Edit Booking Time',
-        html: `
-          <input type="date" id="newDate" class="swal2-input" value="${currentDate}" min="${new Date().toISOString().split('T')[0]}">
-          <input type="time" id="newTime" class="swal2-input" value="${currentTime}">
-          <input type="number" id="newDuration" class="swal2-input" value="${currentDuration / 60}" min="0.5" step="0.5" placeholder="Duration in hours">
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Update',
-        preConfirm: () => {
-          const newDate = document.getElementById('newDate').value;
-          const newTime = document.getElementById('newTime').value;
-          const newDuration = document.getElementById('newDuration').value;
-
-          if (!newDate || !newTime || !newDuration) {
-            Swal.showValidationMessage('All fields are required');
-            return false;
-          }
-
-          return { newDate, newTime, newDuration };
-        }
-      }).then(result => {
-        if (result.isConfirmed) {
-          fetch('update_booking.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              bookingId: bookingId,
-              newDate: result.value.newDate,
-              newTime: result.value.newTime,
-              newDuration: result.value.newDuration * 60
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire('Success', 'Booking updated successfully', 'success').then(() => location.reload());
-            } else {
-              Swal.fire('Error', data.message, 'error');
-            }
-          });
-        }
-      });
-    });
-  });
-
-  // Cancel Booking
-  document.querySelectorAll('.btnCancelBooking').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const bookingId = this.dataset.id;
-
-      Swal.fire({
-        title: 'Cancel Booking?',
-        text: 'This will cancel the booking permanently.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Cancel',
-        cancelButtonText: 'No'
-      }).then(result => {
-        if (result.isConfirmed) {
-          fetch('cancel_booking.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookingId: bookingId })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire('Success', 'Booking cancelled successfully', 'success').then(() => location.reload());
-            } else {
-              Swal.fire('Error', data.message, 'error');
-            }
-          });
-        }
-      });
-    });
-  });
-
-  // === ROOM MANAGEMENT ===
-  // Toggle Room Status
-  document.querySelectorAll('.btnToggleRoom').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const roomId = this.dataset.id;
-      const currentStatus = this.dataset.status;
-      const newStatus = currentStatus === 'available' ? 'booked' : 'available';
-
-      Swal.fire({
-        title: `Set Room ${newStatus}?`,
-        text: `This will change the room status to ${newStatus}.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-      }).then(result => {
-        if (result.isConfirmed) {
-          fetch('toggle_room.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomId: roomId, newStatus: newStatus })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire('Success', `Room status updated to ${newStatus}`, 'success').then(() => location.reload());
-            } else {
-              Swal.fire('Error', data.message, 'error');
-            }
-          });
-        }
-      });
-    });
-  });
   </script>
 </body>
 </html>

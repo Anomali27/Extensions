@@ -1,3 +1,20 @@
+// Smooth page transitions
+document.addEventListener('DOMContentLoaded', function() {
+  const links = document.querySelectorAll('a[href]');
+  links.forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('#') && !href.startsWith('http')) {
+        e.preventDefault();
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+          window.location.href = href;
+        }, 300);
+      }
+    });
+  });
+});
+
 // Scroll Reveal animation
 ScrollReveal({
   reset: true,
