@@ -41,6 +41,9 @@ if ($isLoggedIn) {
                 <li><a href="#home">Beranda</a></li>
                 <li><a href="#unit">Unit Tersedia</a></li>
                 <li><a href="#paket">Paket Harga</a></li>
+                <?php if ($isLoggedIn): ?>
+                    <li><a href="./Unit/orders.php">Pesanan Saya</a></li>
+                <?php endif; ?>
                 <?php if ($role === 'admin'): ?>
                     <li><a href="./Dashboard/dashboard.php">Dashboard</a></li>
                 <?php endif; ?>
@@ -111,35 +114,35 @@ if ($isLoggedIn) {
           <h3>Paket Reguler</h3>
           <p>1 Jam Bermain</p>
           <span>Rp 10.000</span>
-          <a href="#" class="paket-btn">Pesan Sekarang</a>
+          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
         </div>
 
         <div class="paket-card">
           <h3>Paket Hemat</h3>
           <p>3 Jam Bermain</p>
           <span>Rp 25.000</span>
-          <a href="#" class="paket-btn">Pesan Sekarang</a>
+          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
         </div>
 
         <div class="paket-card">
           <h3>Paket Full</h3>
           <p>6 Jam Bermain</p>
           <span>Rp 45.000</span>
-          <a href="#" class="paket-btn">Pesan Sekarang</a>
+          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
         </div>
 
         <div class="paket-card">
           <h3>Paket Malam</h3>
           <p>Mulai 22.00 - 06.00</p>
           <span>Rp 60.000</span>
-          <a href="#" class="paket-btn">Pesan Sekarang</a>
+          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
         </div>
 
         <div class="paket-card">
           <h3>Paket VIP</h3>
           <p>12 Jam + Snack & Minuman Gratis</p>
           <span>Rp 90.000</span>
-          <a href="#" class="paket-btn">Pesan Sekarang</a>
+          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
         </div>
 
       </div>

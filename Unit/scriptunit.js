@@ -2,6 +2,7 @@
 
 // Global variables
 let modal, closeBtn, roomCards, packages, today;
+let selectedTimes = []; // Array to hold selected time slots
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -45,43 +46,55 @@ function initializeEventListeners() {
     const startTimeInput = document.getElementById('startTime');
 
     timeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Hapus kelas aktif dari semua tombol
-            timeButtons.forEach(b => b.classList.remove('active'));
-
-            // Tambahkan kelas aktif ke tombol yang diklik
-            btn.classList.add('active');
-
-            // Simpan nilai jam yang diklik ke input hidden
-            startTimeInput.value = btn.dataset.time;
-
-            // Update selected times for consistency
-            updateSelectedTimes();
-        });
+        btn.addEventListener('click', handleTimeSelection);
     });
 
-    // Duration controls
+    // Duration controls with interactive feedback
     const decreaseBtn = document.getElementById('decreaseDuration');
     const increaseBtn = document.getElementById('increaseDuration');
     const durationInput = document.getElementById('duration');
 
     if (decreaseBtn) {
         decreaseBtn.addEventListener('click', function() {
-            const currentValue = parseFloat(durationInput.value);
+            const currentValue = parseInt(durationInput.value);
             if (currentValue > 1) {
-                durationInput.value = (currentValue - 0.5).toFixed(1);
+                const newValue = currentValue - 1;
+                durationInput.value = newValue;
+
+                // Add visual feedback
+                decreaseBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    decreaseBtn.style.transform = 'scale(1)';
+                }, 100);
+
                 calculatePrice();
                 updateAvailableTimes();
+                adjustTimeSelection();
+            } else {
+                // Visual feedback for minimum reached
+                decreaseBtn.style.background = '#ccc';
+                setTimeout(() => {
+                    decreaseBtn.style.background = '#007bff';
+                }, 200);
             }
         });
     }
 
     if (increaseBtn) {
         increaseBtn.addEventListener('click', function() {
-            const currentValue = parseFloat(durationInput.value);
-            durationInput.value = (currentValue + 0.5).toFixed(1);
+            const currentValue = parseInt(durationInput.value);
+            const newValue = currentValue + 1;
+            durationInput.value = newValue;
+
+            // Add visual feedback
+            increaseBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                increaseBtn.style.transform = 'scale(1)';
+            }, 100);
+
             calculatePrice();
             updateAvailableTimes();
+            adjustTimeSelection();
         });
     }
 
@@ -112,6 +125,12 @@ function initializeEventListeners() {
                 calculatePrice(); // Calculate initial price
                 updateAvailableTimes();
 
+                // Reset time selection to none
+                document.querySelectorAll('.time-btn.active').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                updateSelectedTimes();
+
                 modal.style.display = 'block';
             });
         });
@@ -133,7 +152,10 @@ function initializeEventListeners() {
 
     // Calculate price when package changes
     document.querySelectorAll('input[name="package"]').forEach(radio => {
-        radio.addEventListener('change', calculatePrice);
+        radio.addEventListener('change', () => {
+            calculatePrice();
+            updateAvailableTimes();
+        });
     });
 
     // Calculate price when duration changes
@@ -148,6 +170,7 @@ function initializeEventListeners() {
                 customRadio.checked = true;
                 calculatePrice();
                 updateAvailableTimes();
+                adjustTimeSelection();
             }
         });
     }
@@ -200,47 +223,87 @@ function initializeEventListeners() {
                 console.error('Error submitting booking:', error);
             }
 
-            // Always show success
-            Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
-                location.reload();
-            });
+            // Update room card to booked state immediately
+            const roomCard = document.querySelector(`.room-card[data-room-id="${data.roomId}"]`);
+            if (roomCard) {
+                roomCard.classList.remove('available');
+                roomCard.classList.add('booked');
+                const statusIndicator = roomCard.querySelector('.status-indicator');
+                const statusText = roomCard.querySelector('p');
+                if (statusIndicator) {
+                    statusIndicator.classList.remove('available');
+                    statusIndicator.classList.add('booked');
+                }
+                if (statusText) {
+                    statusText.textContent = 'Dipesan';
+                }
+            }
 
+            // Close modal and show success, then redirect to orders page
             modal.style.display = 'none';
+            Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
+                window.location.href = 'orders.php';
+            });
         });
     }
 }
 
-// Handle time button click
-function handleTimeButtonClick(button) {
-    console.log('handleTimeButtonClick called for button:', button.dataset.time);
-    console.log('Button disabled:', button.disabled);
-    console.log('Button classes:', button.classList);
+// Handle time selection with duration-based multi-selection
+function handleTimeSelection(event) {
+    const button = event.target;
+    const duration = parseInt(document.getElementById('duration').value) || 0;
 
     // Check if button is disabled
     if (button.disabled || button.classList.contains('disabled') || button.classList.contains('booked')) {
-        console.log('Button is disabled or booked, ignoring click');
         return;
     }
 
-    // Check if button is already selected
-    if (button.classList.contains('selected')) {
-        console.log('Button already selected, deselecting');
-        button.classList.remove('selected');
+    // If already selected, deselect it
+    if (button.classList.contains('active')) {
+        button.classList.remove('active');
         updateSelectedTimes();
         return;
     }
 
-    // Remove selected class from all buttons
-    document.querySelectorAll('.time-btn.selected').forEach(btn => {
-        btn.classList.remove('selected');
+    // Clear all previous selections
+    document.querySelectorAll('.time-btn.active').forEach(btn => {
+        btn.classList.remove('active');
     });
 
-    // Add selected class to clicked button
-    button.classList.add('selected');
+    // Calculate required time slots based on duration (each button = 1 hour)
+    const startTime = button.dataset.time;
+    const requiredSlots = duration; // Each slot is 1 hour
+    const timeButtons = Array.from(document.querySelectorAll('.time-btn'));
+    const startIndex = timeButtons.findIndex(btn => btn.dataset.time === startTime);
 
-    // Update hidden input with selected time
+    if (startIndex === -1) return;
+
+    // Check if we have enough consecutive slots
+    let canSelect = true;
+    for (let i = 0; i < requiredSlots; i++) {
+        const slotIndex = startIndex + i;
+        if (slotIndex >= timeButtons.length) {
+            canSelect = false;
+            break;
+        }
+        const slot = timeButtons[slotIndex];
+        if (slot.disabled || slot.classList.contains('disabled') || slot.classList.contains('booked')) {
+            canSelect = false;
+            break;
+        }
+    }
+
+    if (!canSelect) {
+        Swal.fire('Waktu Tidak Tersedia', 'Durasi yang dipilih melebihi slot waktu yang tersedia atau bertabrakan dengan booking lain.', 'warning');
+        return;
+    }
+
+    // Select the required consecutive slots
+    for (let i = 0; i < requiredSlots; i++) {
+        timeButtons[startIndex + i].classList.add('active');
+    }
+
     updateSelectedTimes();
-    console.log('Button clicked:', button.dataset.time, 'Selected:', button.classList.contains('selected'));
 }
 
 // Function to update selected times
@@ -251,6 +314,50 @@ function updateSelectedTimes() {
     if (startTimeInput) {
         startTimeInput.value = selectedTimes.join(',');
     }
+}
+
+// Function to adjust time selection based on duration changes
+function adjustTimeSelection() {
+    const selectedButtons = document.querySelectorAll('.time-btn.active');
+    if (selectedButtons.length === 0) return;
+
+    const duration = parseInt(document.getElementById('duration').value) || 0;
+    const requiredSlots = duration; // Each button = 1 hour
+    const timeButtons = Array.from(document.querySelectorAll('.time-btn'));
+    const startTime = selectedButtons[0].dataset.time;
+    const startIndex = timeButtons.findIndex(btn => btn.dataset.time === startTime);
+
+    if (startIndex === -1) return;
+
+    // Clear current selection
+    selectedButtons.forEach(btn => btn.classList.remove('active'));
+
+    // Check if we can select the required slots
+    let canSelect = true;
+    for (let i = 0; i < requiredSlots; i++) {
+        const slotIndex = startIndex + i;
+        if (slotIndex >= timeButtons.length) {
+            canSelect = false;
+            break;
+        }
+        const slot = timeButtons[slotIndex];
+        if (slot.disabled || slot.classList.contains('disabled') || slot.classList.contains('booked')) {
+            canSelect = false;
+            break;
+        }
+    }
+
+    if (canSelect) {
+        // Select the required consecutive slots
+        for (let i = 0; i < requiredSlots; i++) {
+            timeButtons[startIndex + i].classList.add('active');
+        }
+    } else {
+        // If can't select, clear all selections
+        Swal.fire('Durasi Berubah', 'Durasi yang dipilih tidak sesuai dengan slot waktu yang tersedia. Silakan pilih waktu mulai lagi.', 'info');
+    }
+
+    updateSelectedTimes();
 }
 
 // Calculate price

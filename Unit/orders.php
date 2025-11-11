@@ -101,6 +101,9 @@ while ($row = $result->fetch_assoc()) {
                                     <div class="time-remaining">--:--:--</div>
                                 </div>
                                 <button class="start-btn" onclick="startSession(<?php echo $booking['id']; ?>)">Mulai</button>
+                                <?php if ($role === 'admin'): ?>
+                                    <button class="stop-btn" onclick="stopSession(<?php echo $booking['id']; ?>)">Stop</button>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </div>
