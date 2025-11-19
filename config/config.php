@@ -1,6 +1,4 @@
 <?php
-// config.php
-// File ini digunakan untuk koneksi ke database MySQL
 
 $servername = "localhost";   // default server Laragon
 $username   = "root";        // default user Laragon
@@ -15,6 +13,4 @@ if ($connection->connect_error) {
     die("Koneksi gagal: " . $connection->connect_error);
 }
 
-// (Opsional) Jika ingin menampilkan pesan sukses koneksi
-// echo "Koneksi database berhasil!";
 ?>
