@@ -86,7 +86,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
       <div class="Homepage">
         <a href="../../index.php" class="logo-link">
           <img src="../assets/Logo.png" alt="logo" class="logo"/>
-        </a> Dashboard Pemesanan Billing PlayStation 
+        </a> Dashboard Pemesanan Billing PlayStation
       </div>
     </h1>
 
@@ -176,11 +176,11 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
               </td>
               <td>
                 <!-- Tombol Edit diperbarui agar buka modal -->
-                <button 
-                  class="btn btn-warning btn-sm btnEditUser" 
-                  data-id="<?= $row['id'] ?>" 
-                  data-username="<?= htmlspecialchars($row['username']) ?>" 
-                  data-email="<?= htmlspecialchars($row['email']) ?>" 
+                <button
+                  class="btn btn-warning btn-sm btnEditUser"
+                  data-id="<?= $row['id'] ?>"
+                  data-username="<?= htmlspecialchars($row['username']) ?>"
+                  data-email="<?= htmlspecialchars($row['email']) ?>"
                   data-status="<?= $row['status'] ?>">
                   Edit
                 </button>
@@ -260,48 +260,38 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
           </table>
         </div>
 
-        <!-- Rooms Tab -->
-        <div class="tab-pane fade" id="rooms" role="tabpanel">
-          <table class="table table-hover table-bordered text-center align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php
-              $roomQuery = $connection->query("SELECT id, name, type, status FROM rooms ORDER BY id");
-              if ($roomQuery && $roomQuery->num_rows > 0):
-                while ($row = $roomQuery->fetch_assoc()):
-              ?>
-                <tr>
-                  <td><?= $row['id'] ?></td>
-                  <td><?= htmlspecialchars($row['name']) ?></td>
-                  <td><?= htmlspecialchars($row['type']) ?></td>
-                  <td>
-                    <span class="badge bg-<?= $row['status'] == 'available' ? 'success' : ($row['status'] == 'booked' ? 'warning' : 'danger') ?>">
-                      <?= ucfirst($row['status']) ?>
-                    </span>
-                  </td>
-                  <td>
-                    <button class="btn btn-warning btn-sm btnToggleRoom"
-                            data-id="<?= $row['id'] ?>"
-                            data-status="<?= $row['status'] ?>">
-                      <?= $row['status'] == 'available' ? 'Set Booked' : 'Set Available' ?>
-                    </button>
-                  </td>
-                </tr>
-              <?php endwhile; ?>
-              <?php else: ?>
-                <tr><td colspan="5" class="text-muted">No rooms found.</td></tr>
-              <?php endif; ?>
-            </tbody>
-          </table>
+      <!-- Rooms Tab -->
+      <div class="tab-pane fade" id="rooms" role="tabpanel">
+
+        <div class="row g-4">
+          <?php
+          $roomQuery = $connection->query("SELECT id, name, type, status FROM rooms ORDER BY id");
+          if ($roomQuery && $roomQuery->num_rows > 0):
+            while ($row = $roomQuery->fetch_assoc()):
+          ?>
+
+          <div class="col-md-3"> <!-- 4 cards per row with col-md-3 -->
+            <div class="card shadow-sm h-100 room-card" data-room-id="<?= $row['id'] ?>" style="cursor: pointer;">
+
+              <div class="card-body text-center">
+                <h5 class="card-title fw-bold"><?= htmlspecialchars($row['name']) ?></h5>
+                <p class="text-muted mb-1"><?= htmlspecialchars($row['type']) ?></p>
+
+                <span class="badge fs-6" style="background-color: <?= $row['status'] == 'available' ? '#28a745' : '#dc3545' ?>; color: white;">
+                  <?= ucfirst($row['status']) ?>
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+          <?php endwhile; ?>
+          <?php else: ?>
+            <div class="col-12 text-center text-muted">No rooms found.</div>
+          <?php endif; ?>
         </div>
+
+      </div>
 
         <!-- Inventory Tab -->
         <div class="tab-pane fade" id="inventory" role="tabpanel">
@@ -388,6 +378,103 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         <button type="submit" class="btn-primary">Update Quantity</button>
         <button type="button" class="btn-secondary" id="closeEditInventoryModal">Batal</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal Room Details -->
+  <div class="modal fade" id="roomModal" tabindex="-1" aria-labelledby="roomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="roomModalLabel">Room Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Room Info -->
+          <div class="mb-3">
+            <h6>Room Information</h6>
+            <p><strong>Name:</strong> <span id="modalRoomName"></span></p>
+            <p><strong>Type:</strong> <span id="modalRoomType"></span></p>
+            <p><strong>Status:</strong> <span id="modalRoomStatus" class="badge"></span></p>
+          </div>
+
+          <!-- Current Bookings -->
+          <div class="mb-3">
+            <h6>Today's Bookings</h6>
+            <div id="modalBookings">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+
+          <!-- Available Time Slots -->
+          <div class="mb-3">
+            <h6>Available Time Slots (Today)</h6>
+            <div id="modalSlots">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mb-3">
+            <h6>Actions</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-success" id="btnSetAvailable">Set Available</button>
+              <button class="btn btn-danger" id="btnSetBooked">Set Booked</button>
+              <button class="btn btn-info" id="btnViewHistory">View Booking History</button>
+              <button class="btn btn-primary" id="btnEditRoom">Edit Room</button>
+              <button class="btn btn-danger" id="btnDeleteRoom">Delete Room</button>
+            </div>
+          </div>
+
+          <!-- Edit Form (hidden initially) -->
+          <div id="editRoomForm" style="display: none;">
+            <h6>Edit Room</h6>
+            <form id="formEditRoom">
+              <input type="hidden" id="editRoomId">
+              <div class="mb-3">
+                <label for="editRoomName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="editRoomName" required>
+              </div>
+              <div class="mb-3">
+                <label for="editRoomType" class="form-label">Type</label>
+                <input type="text" class="form-control" id="editRoomType" required>
+              </div>
+              <button type="submit" class="btn btn-success">Save Changes</button>
+              <button type="button" class="btn btn-secondary" id="cancelEdit">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Booking History -->
+  <div class="modal fade" id="roomHistoryModal" tabindex="-1" aria-labelledby="roomHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="roomHistoryModalLabel">Booking History</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="5" class="text-center">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -110,77 +110,64 @@ body {
     background-color: #bb2d3b;
 }
 
-/* === MODAL STYLE === */
+/* === MODAL STYLE ( FIXED & IMPROVED ) === */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 999;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.45);
+    display: flex !important;
     justify-content: center;
     align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+/* Modal show state (Bootstrap compatible) */
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .modal-content {
     background: #ffffff;
     padding: 25px 30px;
-    border-radius: 10px;
-    width: 360px;
+    border-radius: 12px;
+    width: 500px; /* BIGGER */
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+    animation: modalPop 0.25s ease;
 }
 
-.modal-content h3 {
-    text-align: center;
+/* Animation */
+@keyframes modalPop {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    border-bottom: none;
+}
+
+.modal-title {
     font-weight: 600;
-    margin-bottom: 20px;
-    color: #212529;
 }
 
-
-.modal-content input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    margin-bottom: 15px;
-}
-
-.modal-content button {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
+.btn-close {
+    background: none;
     border: none;
-    font-weight: 600;
-    font-size: 1rem;
-    margin-top: 5px;
+    font-size: 1.5rem;
     cursor: pointer;
-    transition: 0.3s;
-}
-
-.modal-content .btn-primary {
-    background-color: #007bff;
-    color: white;
-}
-
-.modal-content .btn-primary:hover {
-    background-color: #0069d9;
-}
-
-.modal-content .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.modal-content .btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-.Homepage{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 100px;
 }
