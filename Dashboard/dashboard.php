@@ -142,6 +142,9 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab">Rooms</button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">Inventory</button>
+        </li>
       </ul>
 
       <!-- Tab Content -->
@@ -299,6 +302,44 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </tbody>
           </table>
         </div>
+
+        <!-- Inventory Tab -->
+        <div class="tab-pane fade" id="inventory" role="tabpanel">
+          <table class="table table-hover table-bordered text-center align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Quantity Available</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              $inventoryQuery = $connection->query("SELECT id, type, quantity_available FROM inventory ORDER BY id");
+              if ($inventoryQuery && $inventoryQuery->num_rows > 0):
+                while ($row = $inventoryQuery->fetch_assoc()):
+              ?>
+                <tr>
+                  <td><?= $row['id'] ?></td>
+                  <td><?= htmlspecialchars($row['type']) ?></td>
+                  <td><?= $row['quantity_available'] ?></td>
+                  <td>
+                    <button class="btn btn-warning btn-sm btnEditInventory"
+                            data-id="<?= $row['id'] ?>"
+                            data-type="<?= htmlspecialchars($row['type']) ?>"
+                            data-quantity="<?= $row['quantity_available'] ?>">
+                      Edit Quantity
+                    </button>
+                  </td>
+                </tr>
+              <?php endwhile; ?>
+              <?php else: ?>
+                <tr><td colspan="4" class="text-muted">No inventory items found.</td></tr>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -332,6 +373,20 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         </select>
         <button type="submit" class="btn-primary">Simpan Perubahan</button>
         <button type="button" class="btn-secondary" id="closeEditModal">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Edit Inventory -->
+  <div id="modalEditInventory" class="modal">
+    <div class="modal-content">
+      <h3>Edit Inventory Quantity</h3>
+      <form id="editInventoryForm" method="POST" action="edit_inventory.php">
+        <input type="hidden" name="id" id="editInventoryId">
+        <input type="text" id="editInventoryType" placeholder="Type" readonly>
+        <input type="number" name="quantity_available" id="editInventoryQuantity" placeholder="Quantity Available" required min="0">
+        <button type="submit" class="btn-primary">Update Quantity</button>
+        <button type="button" class="btn-secondary" id="closeEditInventoryModal">Batal</button>
       </form>
     </div>
   </div>
