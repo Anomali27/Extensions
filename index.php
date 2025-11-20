@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Jika di localhost, hancurkan session agar tidak ada akun yang terlogin
+if ($_SERVER['HTTP_HOST'] == 'localhost') {
+    session_destroy();
+    session_start();
+}
+
 include './config/config.php';
 
 // Cek login
@@ -17,6 +24,16 @@ if ($isLoggedIn) {
         $role = $row['role'];
     }
 }
+
+// Fetch user data with saldo using prepared statement
+$user_id = $_SESSION['user_id'];
+$query = "SELECT id, username, email, saldo FROM users WHERE id = ?";
+$stmt = $connection->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -155,5 +172,13 @@ if ($isLoggedIn) {
 
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="script.js"></script>
+
+    <!-- Floating Balance Widget -->
+    <div class="balance-widget">
+        <h4>Your Balance</h4>
+        <div class="balance-amount">Rp <?php echo number_format($user['saldo'], 0, ',', '.'); ?></div>
+        <a href="../topup/topup.php" class="topup-btn">Top Up Saldo</a>
+    </div>
+
 </body>
 </html>

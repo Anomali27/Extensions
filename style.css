@@ -28,7 +28,7 @@ body {
   align-items: center;
   background: linear-gradient(to right, #6b7280, #374151);
   color: white;
-  padding: 15px 70px;
+  padding: 8px 70px;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -59,7 +59,7 @@ body {
 
 .navbar ul {
   display: flex;
-  gap: 30px;
+  gap: 20px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -69,7 +69,7 @@ body {
   color: white;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: color 0.3s ease, transform 0.2s ease;
@@ -80,7 +80,8 @@ body {
 .navbar ul li a:hover {
   color: #93c5fd;
   background: rgba(255,255,255,0.1);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  border-radius: 4px;
 }
 
 .user-area {
@@ -128,7 +129,7 @@ body {
 }
 
 .avatar {
-  width: 30px;
+  width: 25px;
 }
 
 .admin-badge {
@@ -359,6 +360,60 @@ footer {
   margin-top: auto;
 }
 
+/* === BALANCE WIDGET === */
+.balance-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 250px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.balance-widget:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.balance-widget h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.balance-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0 0 15px 0;
+}
+
+.topup-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.topup-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: scale(1.05);
+  color: white;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .navbar {
@@ -382,5 +437,114 @@ footer {
 
   .unit-card, .paket-card {
     width: 90%;
+  }
+
+  .balance-widget {
+    width: 200px;
+    padding: 15px;
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .balance-widget h4 {
+    font-size: 1rem;
+  }
+
+  .balance-amount {
+    font-size: 1.2rem;
+  }
+
+  .topup-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* === BALANCE WIDGET === */
+.balance-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 250px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.balance-widget:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.balance-widget h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.balance-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0 0 15px 0;
+}
+
+.topup-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.topup-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: scale(1.05);
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .balance-widget {
+    width: 200px;
+    padding: 15px;
+    bottom: 15px;
+    right: 15px;
+  }
+  
+  .balance-widget h4 {
+    font-size: 1rem;
+  }
+  
+  .balance-amount {
+    font-size: 1.2rem;
+  }
+  
+  .topup-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
   }
 }
