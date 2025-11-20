@@ -145,6 +145,9 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">Inventory</button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="topup-history-tab" data-bs-toggle="tab" data-bs-target="#topup-history" type="button" role="tab">Top Up History</button>
+        </li>
       </ul>
 
       <!-- Tab Content -->
@@ -158,6 +161,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             <th style="width: 60px;">ID</th>
             <th>Username</th>
             <th>Email</th>
+            <th>Saldo</th>
             <th>Status</th>
             <th style="width: 160px;">Aksi</th>
           </tr>
@@ -169,6 +173,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
               <td><?= $row['id'] ?></td>
               <td><?= htmlspecialchars($row['username']) ?></td>
               <td><?= htmlspecialchars($row['email']) ?></td>
+              <td>Rp <?= number_format($row['saldo'] ?? 0, 0, ',', '.') ?></td>
               <td>
                 <span class="badge <?= ($row['status'] ?? 'offline') == 'online' ? 'bg-success' : 'bg-secondary' ?>">
                   <?= ucfirst($row['status'] ?? 'offline') ?>
@@ -189,7 +194,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </tr>
           <?php endwhile; ?>
         <?php else: ?>
-          <tr><td colspan="5" class="text-muted">Tidak ada user ditemukan.</td></tr>
+          <tr><td colspan="6" class="text-muted">Tidak ada user ditemukan.</td></tr>
         <?php endif; ?>
         </tbody>
       </table>
@@ -326,6 +331,51 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
               <?php endwhile; ?>
               <?php else: ?>
                 <tr><td colspan="4" class="text-muted">No inventory items found.</td></tr>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Top Up History Tab -->
+        <div class="tab-pane fade" id="topup-history" role="tabpanel">
+          <table class="table table-hover table-bordered text-center align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>No</th>
+                <th>Username</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              $topupQuery = $connection->query("
+                SELECT th.id, u.username, th.amount, th.method, th.status, th.created_at
+                FROM topup_history th
+                JOIN users u ON th.user_id = u.id
+                ORDER BY th.created_at DESC
+              ");
+              if ($topupQuery && $topupQuery->num_rows > 0):
+                $no = 1;
+                while ($row = $topupQuery->fetch_assoc()):
+              ?>
+                <tr>
+                  <td><?= $no++ ?></td>
+                  <td><?= htmlspecialchars($row['username']) ?></td>
+                  <td>Rp <?= number_format($row['amount'], 0, ',', '.') ?></td>
+                  <td><?= htmlspecialchars($row['method']) ?></td>
+                  <td>
+                    <span class="badge bg-<?= $row['status'] == 'completed' ? 'success' : ($row['status'] == 'pending' ? 'warning' : 'danger') ?>">
+                      <?= ucfirst($row['status']) ?>
+                    </span>
+                  </td>
+                  <td><?= date('d-m-Y H:i', strtotime($row['created_at'])) ?></td>
+                </tr>
+              <?php endwhile; ?>
+              <?php else: ?>
+                <tr><td colspan="6" class="text-muted">No top-up history found.</td></tr>
               <?php endif; ?>
             </tbody>
           </table>

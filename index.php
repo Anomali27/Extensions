@@ -25,15 +25,18 @@ if ($isLoggedIn) {
     }
 }
 
-// Fetch user data with saldo using prepared statement
-$user_id = $_SESSION['user_id'];
-$query = "SELECT id, username, email, saldo FROM users WHERE id = ?";
-$stmt = $connection->prepare($query);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+// === FETCH SALDO USER ===
+$user = null;
+if ($isLoggedIn && isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
 
+    $query = "SELECT id, username, email, saldo FROM users WHERE id = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -45,6 +48,7 @@ $user = $result->fetch_assoc();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
     <!-- NAVBAR -->
     <header class="navbar">
         <div class="logo">
@@ -58,9 +62,11 @@ $user = $result->fetch_assoc();
                 <li><a href="#home">Beranda</a></li>
                 <li><a href="#unit">Unit Tersedia</a></li>
                 <li><a href="#paket">Paket Harga</a></li>
+
                 <?php if ($isLoggedIn): ?>
                     <li><a href="./Unit/orders.php">Pesanan Saya</a></li>
                 <?php endif; ?>
+
                 <?php if ($role === 'admin'): ?>
                     <li><a href="./Dashboard/dashboard.php">Dashboard</a></li>
                 <?php endif; ?>
@@ -99,70 +105,73 @@ $user = $result->fetch_assoc();
     <section id="unit" class="unit section">
         <h2>Unit Tersedia</h2>
         <div class="unit-grid">
+
             <div class="unit-card">
                 <img src="./assets/PS5.png" alt="PS5" />
                 <h3>PlayStation 5</h3>
-                <p>Kualitas grafis 4K, performa cepat, dan pengalaman generasi terbaru.</p>
+                <p>Kualitas grafis 4K, performa cepat.</p>
                 <a href="./Unit/unit.php" class="unit-btn">Lihat Detail</a>
             </div>
 
             <div class="unit-card">
                 <img src="./assets/PS4.png" alt="PS4" />
                 <h3>PlayStation 4 Pro</h3>
-                <p>Performa solid dan cocok untuk multiplayer bersama teman-teman.</p>
+                <p>Cocok untuk multiplayer bersama teman-teman.</p>
                 <a href="./Unit/unit.php" class="unit-btn">Lihat Detail</a>
             </div>
 
             <div class="unit-card">
                 <img src="./assets/VR.png" alt="VR" />
                 <h3>PS VR Set</h3>
-                <p>Rasakan dunia virtual dengan pengalaman bermain yang imersif.</p>
+                <p>Rasakan dunia virtual yang imersif.</p>
                 <a href="./Unit/unit.php" class="unit-btn">Lihat Detail</a>
             </div>
+
         </div>
     </section>
 
     <!-- PAKET -->
     <section id="paket" class="paket section">
-      <h2>Paket Harga</h2>
-      <div class="paket-grid">
+        <h2>Paket Harga</h2>
 
-        <div class="paket-card">
-          <h3>Paket Reguler</h3>
-          <p>1 Jam Bermain</p>
-          <span>Rp 10.000</span>
-          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+        <div class="paket-grid">
+
+            <div class="paket-card">
+                <h3>Paket Reguler</h3>
+                <p>1 Jam Bermain</p>
+                <span>Rp 10.000</span>
+                <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+            </div>
+
+            <div class="paket-card">
+                <h3>Paket Hemat</h3>
+                <p>3 Jam Bermain</p>
+                <span>Rp 25.000</span>
+                <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+            </div>
+
+            <div class="paket-card">
+                <h3>Paket Full</h3>
+                <p>6 Jam Bermain</p>
+                <span>Rp 45.000</span>
+                <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+            </div>
+
+            <div class="paket-card">
+                <h3>Paket Malam</h3>
+                <p>22.00 - 06.00</p>
+                <span>Rp 60.000</span>
+                <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+            </div>
+
+            <div class="paket-card">
+                <h3>Paket VIP</h3>
+                <p>12 Jam + Snack & Minuman</p>
+                <span>Rp 90.000</span>
+                <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
+            </div>
+
         </div>
-
-        <div class="paket-card">
-          <h3>Paket Hemat</h3>
-          <p>3 Jam Bermain</p>
-          <span>Rp 25.000</span>
-          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
-        </div>
-
-        <div class="paket-card">
-          <h3>Paket Full</h3>
-          <p>6 Jam Bermain</p>
-          <span>Rp 45.000</span>
-          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
-        </div>
-
-        <div class="paket-card">
-          <h3>Paket Malam</h3>
-          <p>Mulai 22.00 - 06.00</p>
-          <span>Rp 60.000</span>
-          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
-        </div>
-
-        <div class="paket-card">
-          <h3>Paket VIP</h3>
-          <p>12 Jam + Snack & Minuman Gratis</p>
-          <span>Rp 90.000</span>
-          <a href="<?php echo $isLoggedIn ? './Unit/unit.php' : './auth/auth.php'; ?>" class="paket-btn">Pesan Sekarang</a>
-        </div>
-
-      </div>
     </section>
 
     <!-- FOOTER -->
@@ -170,15 +179,16 @@ $user = $result->fetch_assoc();
         <p>© 2025 PS Billing. All Rights Reserved.</p>
     </footer>
 
-    <script src="https://unpkg.com/scrollreveal"></script>
     <script src="script.js"></script>
 
-    <!-- Floating Balance Widget -->
+    <!-- FLOATING BALANCE WIDGET -->
+    <?php if ($isLoggedIn && $user): ?>
     <div class="balance-widget">
         <h4>Your Balance</h4>
         <div class="balance-amount">Rp <?php echo number_format($user['saldo'], 0, ',', '.'); ?></div>
-        <a href="../topup/topup.php" class="topup-btn">Top Up Saldo</a>
+        <a href="./topup/topup.php" class="topup-btn">Top Up Saldo</a>
     </div>
+    <?php endif; ?>
 
 </body>
 </html>
