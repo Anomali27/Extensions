@@ -70,12 +70,6 @@ function initializeEventListeners() {
                 calculatePrice();
                 updateAvailableTimes();
                 adjustTimeSelection();
-            } else {
-                // Visual feedback for minimum reached
-                decreaseBtn.style.background = '#ccc';
-                setTimeout(() => {
-                    decreaseBtn.style.background = '#007bff';
-                }, 200);
             }
         });
     }
@@ -117,6 +111,7 @@ function initializeEventListeners() {
                 // Clear any previous time selections BEFORE updating
                 document.querySelectorAll('.time-btn.active').forEach(btn => {
                     btn.classList.remove('active');
+                    btn.setAttribute('tabindex', '-1');
                 });
                 updateSelectedTimes();
 
@@ -128,10 +123,16 @@ function initializeEventListeners() {
                 // Reset time selection to none
                 document.querySelectorAll('.time-btn.active').forEach(btn => {
                     btn.classList.remove('active');
+                    btn.setAttribute('tabindex', '-1');
                 });
                 updateSelectedTimes();
 
-                modal.style.display = 'block';
+                modalFadeIn();
+                modal.setAttribute('aria-hidden', 'false');
+
+                // Focus first active or first time-btn for accessibility
+                const firstBtn = document.querySelector('.time-btn');
+                if (firstBtn) firstBtn.focus();
             });
         });
     }
@@ -139,14 +140,21 @@ function initializeEventListeners() {
     // Close modal
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
+            modalFadeOut();
         });
     }
 
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
-            modal.style.display = 'none';
+            modalFadeOut();
+        }
+    });
+
+    // Keyboard accessibility: close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape" && modal.style.display === 'block') {
+            modalFadeOut();
         }
     });
 
@@ -160,9 +168,8 @@ function initializeEventListeners() {
 
     // Calculate price when duration changes
     if (durationInput) {
-        durationInput.addEventListener('input', calculatePrice);
-        durationInput.addEventListener('input', function() {
-            const duration = parseFloat(this.value) || 0;
+        durationInput.addEventListener('input', () => {
+            const duration = parseFloat(durationInput.value) || 0;
             const customRadio = document.querySelector('input[name="package"][value="Custom"]');
 
             // Auto-select Custom when duration is changed
@@ -173,6 +180,7 @@ function initializeEventListeners() {
                 adjustTimeSelection();
             }
         });
+        durationInput.addEventListener('input', calculatePrice);
     }
 
     // Booking form submit
@@ -240,7 +248,7 @@ function initializeEventListeners() {
                     }
 
                     // Close modal and show success, then redirect to orders page
-                    modal.style.display = 'none';
+                    modalFadeOut();
                     Swal.fire('Berhasil!', 'Booking berhasil dibuat.', 'success').then(() => {
                         window.location.href = 'orders.php';
                     });
@@ -255,63 +263,62 @@ function initializeEventListeners() {
     }
 }
 
+// Modal fade in/out animation functions
+function modalFadeIn() {
+    modal.style.opacity = 0;
+    modal.style.display = 'block';
+
+    let op = 0;
+    const timer = setInterval(() => {
+        if (op >= 1) clearInterval(timer);
+        modal.style.opacity = op;
+        op += 0.1;
+    }, 20);
+}
+
+function modalFadeOut() {
+    let op = 1;
+    const timer = setInterval(() => {
+        if (op <= 0) {
+            clearInterval(timer);
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        modal.style.opacity = op;
+        op -= 0.1;
+    }, 20);
+}
+
 // Handle time selection with duration-based multi-selection
 function handleTimeSelection(event) {
     const button = event.target;
-    const duration = parseInt(document.getElementById('duration').value) || 0;
+    if (button.classList.contains("disabled") || button.classList.contains("booked")) return;
 
-    // Check if button is disabled
-    if (button.disabled || button.classList.contains('disabled') || button.classList.contains('booked')) {
-        return;
-    }
+    const timeButtons = [...document.querySelectorAll(".time-btn")];
+    const duration = parseInt(document.getElementById("duration").value);
 
-    // If already selected, deselect it
-    if (button.classList.contains('active')) {
-        button.classList.remove('active');
-        updateSelectedTimes();
-        return;
-    }
-
-    // Clear all previous selections
-    document.querySelectorAll('.time-btn.active').forEach(btn => {
-        btn.classList.remove('active');
-    });
-
-    // Calculate required time slots based on duration (each button = 1 hour)
-    const startTime = button.dataset.time;
-    const requiredSlots = duration; // Each slot is 1 hour
-    const timeButtons = Array.from(document.querySelectorAll('.time-btn'));
-    const startIndex = timeButtons.findIndex(btn => btn.dataset.time === startTime);
-
+    const startIndex = timeButtons.indexOf(button);
     if (startIndex === -1) return;
 
-    // Check if we have enough consecutive slots
-    let canSelect = true;
-    for (let i = 0; i < requiredSlots; i++) {
-        const slotIndex = startIndex + i;
-        if (slotIndex >= timeButtons.length) {
-            canSelect = false;
-            break;
-        }
-        const slot = timeButtons[slotIndex];
-        if (slot.disabled || slot.classList.contains('disabled') || slot.classList.contains('booked')) {
-            canSelect = false;
-            break;
+    // Clear old selections
+    timeButtons.forEach(btn => btn.classList.remove("active"));
+
+    for (let i = 0; i < duration; i++) {
+        const nextBtn = timeButtons[startIndex + i];
+        if (!nextBtn || nextBtn.classList.contains("booked")) {
+            Swal.fire("Slot tidak tersedia", "Silahkan pilih jam lain.", "warning");
+            return;
         }
     }
 
-    if (!canSelect) {
-        Swal.fire('Waktu Tidak Tersedia', 'Durasi yang dipilih melebihi slot waktu yang tersedia atau bertabrakan dengan booking lain.', 'warning');
-        return;
+    for (let i = 0; i < duration; i++) {
+        timeButtons[startIndex + i].classList.add("active");
     }
 
-    // Select the required consecutive slots
-    for (let i = 0; i < requiredSlots; i++) {
-        timeButtons[startIndex + i].classList.add('active');
-    }
-
-    updateSelectedTimes();
+    const startTimeInput = document.getElementById("startTime");
+    startTimeInput.value = button.dataset.time; // ONLY FIRST TIME SELECTED
 }
+
 
 // Function to update selected times
 function updateSelectedTimes() {
@@ -337,7 +344,10 @@ function adjustTimeSelection() {
     if (startIndex === -1) return;
 
     // Clear current selection
-    selectedButtons.forEach(btn => btn.classList.remove('active'));
+    selectedButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('tabindex', '-1');
+    });
 
     // Check if we can select the required slots
     let canSelect = true;
@@ -358,6 +368,7 @@ function adjustTimeSelection() {
         // Select the required consecutive slots
         for (let i = 0; i < requiredSlots; i++) {
             timeButtons[startIndex + i].classList.add('active');
+            timeButtons[startIndex + i].setAttribute('tabindex', '0');
         }
     } else {
         // If can't select, clear all selections
@@ -390,106 +401,37 @@ function calculatePrice() {
 
 // Function to update available times based on duration and existing bookings
 function updateAvailableTimes() {
-    const durationInput = document.getElementById('duration');
-    const startDateInput = document.getElementById('startDate');
-    const roomIdInput = document.getElementById('roomId');
+    const roomId = document.getElementById("roomId").value;
+    const selectedDate = document.getElementById("startDate").value;
+    const duration = parseInt(document.getElementById("duration").value);
 
-    if (!durationInput || !startDateInput || !roomIdInput) {
-        console.log('Missing input elements for updateAvailableTimes');
-        return;
-    }
+    if (!roomId || !selectedDate) return;
 
-    const duration = parseFloat(durationInput.value) || 0;
-    const selectedDate = startDateInput.value;
-    const roomId = roomIdInput.value;
-    const timeButtons = document.querySelectorAll('.time-btn');
-
-    console.log('updateAvailableTimes called:', { duration, selectedDate, roomId, timeButtonsLength: timeButtons.length });
-
-    if (!selectedDate || duration <= 0 || !roomId) {
-        console.log('Showing all times as available (missing params)');
-        // Show all times if no date, duration, or room selected
-        timeButtons.forEach(btn => {
-            btn.classList.remove('disabled', 'booked');
-            btn.disabled = false;
-        });
-        return;
-    }
-
-    // Fetch existing bookings for this room and date
-    console.log('Fetching bookings for room:', roomId, 'date:', selectedDate);
-    fetch(`get_bookings.php?room_id=${roomId}&date=${selectedDate}`)
-        .then(response => {
-            console.log('Fetch response status:', response.status);
-            return response.json();
-        })
+    fetch(`../php/get_bookings.php?room_id=${roomId}&date=${selectedDate}`)
+        .then(res => res.json())
         .then(bookings => {
-            console.log('Bookings received:', bookings);
-            const now = new Date();
-            const selectedDateObj = new Date(selectedDate);
+            const timeButtons = document.querySelectorAll(".time-btn");
 
             timeButtons.forEach(btn => {
-                const startTime = btn.dataset.time;
-                const [hours, minutes] = startTime.split(':').map(Number);
-                const startDateTime = new Date(selectedDateObj);
-                startDateTime.setHours(hours, minutes, 0, 0);
+                btn.classList.remove("disabled", "booked", "active");
+            });
 
-                const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 60 * 1000);
+            bookings.forEach(b => {
+                const start = parseInt(b.start_time.split(":")[0]);
+                const dur = parseInt(b.duration);
+                const end = (start + dur) % 24;
 
-                // Check if this time slot conflicts with existing bookings
-                let isBooked = false;
-                bookings.forEach(booking => {
-                    const bookingStart = new Date(`${selectedDate}T${booking.start_time}`);
-                    const bookingEnd = new Date(bookingStart.getTime() + booking.duration * 60 * 1000);
-
-                    // Check for overlap
-                    if ((startDateTime < bookingEnd && endDateTime > bookingStart)) {
-                        isBooked = true;
-                    }
-                });
-
-                // Disable if start time is in the past for today
-                const isToday = selectedDate === today;
-                const isPastTime = isToday && startDateTime < now;
-
-                // Disable if end time is after 24:00 (next day)
-                const isOvernight = endDateTime.getDate() !== startDateTime.getDate();
-
-                console.log(`Time ${startTime}: isPast=${isPastTime}, isOvernight=${isOvernight}, isBooked=${isBooked}`);
-
-                if (isPastTime || isOvernight) {
-                    btn.classList.add('disabled');
-                    btn.classList.remove('booked');
-                    btn.disabled = true;
-                    // If this button was selected, unselect it
-                    if (btn.classList.contains('active')) {
-                        btn.classList.remove('active');
-                        updateSelectedTimes();
-                    }
-                } else if (isBooked) {
-                    btn.classList.add('booked');
-                    btn.classList.remove('disabled');
-                    btn.disabled = true;
-                    // If this button was selected, unselect it
-                    if (btn.classList.contains('active')) {
-                        btn.classList.remove('active');
-                        updateSelectedTimes();
-                    }
-                } else {
-                    btn.classList.remove('disabled', 'booked');
-                    btn.disabled = false;
+                for (let i = 0; i < dur; i++) {
+                    const blockIndex = (start + i) % 24;
+                    const targetBtn = timeButtons[blockIndex];
+                    if (targetBtn) targetBtn.classList.add("booked");
                 }
             });
-        })
-        .catch(error => {
-            console.error('Error fetching bookings:', error);
-            // If error, show all times as available
-            timeButtons.forEach(btn => {
-                btn.classList.remove('disabled', 'booked');
-                btn.disabled = false;
-            });
+
+            adjustTimeSelection(); // Keep selected slot valid
         });
 }
+
 
 // Stopwatch for active bookings
 function updateStopwatch() {
@@ -497,6 +439,17 @@ function updateStopwatch() {
         const bookingId = stopwatch.dataset.bookingId;
         const duration = parseInt(stopwatch.dataset.duration);
         const timeRemainingEl = stopwatch.querySelector('.time-remaining');
+        const startBtn = stopwatch.querySelector('.start-btn');
+
+        // Show or hide start button based on user role (from injected variable USER_ROLE)
+        if (startBtn) {
+            if (typeof USER_ROLE !== 'undefined' && USER_ROLE === 'admin') {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = false;
+            } else {
+                startBtn.style.display = 'none';
+            }
+        }
 
         // Get start time from local storage (only if user has started)
         let startTime = localStorage.getItem(`start_${bookingId}`);
@@ -525,6 +478,12 @@ function updateStopwatch() {
 }
 
 function startSession(bookingId) {
+    // Only admin can start session
+    if (typeof USER_ROLE === 'undefined' || USER_ROLE !== 'admin') {
+        Swal.fire('Error', 'Hanya admin yang dapat memulai sesi permainan.', 'error');
+        return;
+    }
+
     // Send request to server to record start time
     fetch('start_session.php', {
         method: 'POST',
@@ -539,7 +498,10 @@ function startSession(bookingId) {
 
             // Hide start button and show stop button
             const stopwatch = document.querySelector(`.stopwatch[data-booking-id="${bookingId}"]`);
-            stopwatch.querySelector('.start-btn').style.display = 'none';
+            if (!stopwatch) return;
+
+            const startBtn = stopwatch.querySelector('.start-btn');
+            if (startBtn) startBtn.style.display = 'none';
 
             // Add stop button if not exists
             if (!stopwatch.querySelector('.stop-btn')) {
