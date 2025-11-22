@@ -13,5 +13,5 @@ if ($result) {
     echo "Error: " . $connection->error;
 }
 
-$connection->close();
+/* $connection->close(); */
 ?>

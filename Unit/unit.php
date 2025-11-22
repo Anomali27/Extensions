@@ -10,12 +10,14 @@ if (!isset($_SESSION['user'])) {
 
 $username = $_SESSION['user'];
 
-// Ambil role user
-$query = $connection->prepare("SELECT role FROM users WHERE username = ?");
+// Ambil role user dan saldo
+$query = $connection->prepare("SELECT role, saldo FROM users WHERE username = ?");
 $query->bind_param("s", $username);
 $query->execute();
 $result = $query->get_result();
-$role = $result->fetch_assoc()['role'];
+$user_data = $result->fetch_assoc();
+$role = $user_data['role'];
+$saldo = $user_data['saldo'];
 
 // Ambil data rooms dari database (asumsi tabel rooms ada)
 $rooms = [];
@@ -68,6 +70,15 @@ while ($row = $query->fetch_assoc()) {
             </div>
         </div>
     </header>
+
+    <!-- Floating Balance Widget -->
+    <?php if (isset($saldo)): ?>
+    <div class="balance-widget">
+        <h4>Saldo Anda</h4>
+        <div class="balance-amount">Rp <?php echo number_format($saldo, 0, ',', '.'); ?></div>
+        <a href="../Topup/topup.php" class="topup-btn">Top Up Saldo</a>
+    </div>
+    <?php endif; ?>
 
     <!-- UNIT ROOMS -->
     <section id="unit" class="unit section">
@@ -234,7 +245,7 @@ while ($row = $query->fetch_assoc()) {
                 <input type="hidden" id="startTime" name="startTime" required>
 
                 <div class="total-price-container">
-                    <p>Total Harga: Rp <span id="totalPrice">0</span></p>
+                    <p class="total-price">Total Harga: Rp <span id="totalPrice">0</span></p>
                 </div>
                 <div class="button-container">
                     <button type="submit">Pesan & Bayar</button>

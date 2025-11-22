@@ -10,25 +10,34 @@ if (!isset($_SESSION['user'])) {
 
 $username = $_SESSION['user'];
 
-// Ambil user_id
-$query = $connection->prepare("SELECT id, role FROM users WHERE username = ?");
+// Ambil user_id, role, dan saldo
+$query = $connection->prepare("SELECT id, role, saldo FROM users WHERE username = ?");
 $query->bind_param("s", $username);
 $query->execute();
 $result = $query->get_result();
 $user = $result->fetch_assoc();
 $user_id = $user['id'];
 $role = $user['role'];
+$saldo = $user['saldo'];
 
 // Ambil orders user
 $bookings = [];
-$query = $connection->prepare("
-    SELECT b.*, r.type, r.name AS room_number
-    FROM orders b
-    JOIN rooms r ON b.room_id = r.id
-    WHERE b.user_id = ?
-    ORDER BY b.created_at DESC
-");
-$query->bind_param("i", $user_id);
+if ($role === 'admin') {
+    $sql = "SELECT b.*, r.type, r.name AS room_number, u.username
+            FROM orders b
+            JOIN rooms r ON b.room_id = r.id
+            JOIN users u ON b.user_id = u.id
+            ORDER BY b.created_at DESC";
+    $query = $connection->prepare($sql);
+} else {
+    $sql = "SELECT b.*, r.type, r.name AS room_number
+            FROM orders b
+            JOIN rooms r ON b.room_id = r.id
+            WHERE b.user_id = ?
+            ORDER BY b.created_at DESC";
+    $query = $connection->prepare($sql);
+    $query->bind_param("i", $user_id);
+}
 $query->execute();
 $result = $query->get_result();
 while ($row = $result->fetch_assoc()) {
@@ -80,29 +89,31 @@ while ($row = $result->fetch_assoc()) {
 
     <!-- ORDERS -->
     <section id="orders" class="orders section">
-        <h2>Pesanan Saya</h2>
+                <h2><?php echo ($role === 'admin') ? 'Pesanan User' : 'Pesanan Saya'; ?></h2>
         <?php if (empty($bookings)): ?>
             <p>Anda belum memiliki pesanan.</p>
         <?php else: ?>
             <div class="orders-grid">
                 <?php foreach ($bookings as $booking): ?>
                     <div class="order-card">
-                        <h3><?php echo $booking['type']; ?> - Room <?php echo $booking['room_number']; ?></h3>
-                        <p>Tanggal: <?php echo date('d/m/Y', strtotime($booking['start_date'])); ?></p>
-                        <p>Jam Mulai: <?php echo $booking['start_time']; ?></p>
-                        <p>Durasi: <?php echo $booking['duration']; ?> menit</p>
-                        <p>Paket: <?php echo $booking['package'] ?: 'Custom'; ?></p>
-                        <p>Harga: Rp <?php echo number_format($booking['price'], 0, ',', '.'); ?></p>
-                        <p>Status: <?php echo ucfirst($booking['status']); ?></p>
-                        <?php if ($booking['status'] == 'active'): ?>
-                            <div class="stopwatch" data-booking-id="<?php echo $booking['id']; ?>" data-duration="<?php echo $booking['duration']; ?>">
-                                <div class="time-display">
-                                    <div class="time-label">Waktu Tersisa</div>
-                                    <div class="time-remaining">--:--:--</div>
-                                </div>
-                                <button class="start-btn" onclick="startSession(<?php echo $booking['id']; ?>)">Mulai</button>
-                            </div>
+                        <h3><?php echo htmlspecialchars($booking['room_number']); ?></h3>
+                        <?php if ($role === 'admin'): ?>
+                            <p><strong>User:</strong> <?php echo htmlspecialchars($booking['username']); ?></p>
                         <?php endif; ?>
+                        <p><strong>Tanggal:</strong> <?php echo date('d/m/Y', strtotime($booking['start_date'])); ?></p>
+                        <p><strong>Jam Mulai:</strong> <?php echo $booking['start_time']; ?></p>
+                        <p><strong>Durasi:</strong> <?php echo $booking['duration']; ?> menit</p>
+                        <p><strong>Paket:</strong> <?php echo $booking['package'] ?: 'Custom'; ?></p>
+                        <p><strong>Harga:</strong> Rp <?php echo number_format($booking['price'], 0, ',', '.'); ?></p>
+                        <p><strong>Status:</strong> <?php echo ucfirst($booking['status']); ?></p>
+                <?php if ($booking['status'] == 'active'): ?>
+                    <div class="stopwatch" data-booking-id="<?php echo $booking['id']; ?>" data-duration="<?php echo $booking['duration']; ?>" data-start-date="<?php echo $booking['start_date']; ?>" data-start-time="<?php echo $booking['start_time']; ?>">
+                        <div class="time-display">
+                            <div class="time-label">Waktu Tersisa</div>
+                            <div class="time-remaining">--:--:--</div>
+                        </div>
+                    </div>
+                <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -114,6 +125,9 @@ while ($row = $result->fetch_assoc()) {
         <p>© 2025 PS Billing. All Rights Reserved.</p>
     </footer>
 
+    <script>
+        const USER_ROLE = "<?php echo $role; ?>";
+    </script>
     <script src="scriptunit.js"></script>
     <script>
         // Auto-complete check every minute

@@ -1,5 +1,3 @@
-// scriptunit.js
-
 // Global variables
 let modal, closeBtn, roomCards, packages, today;
 let selectedTimes = []; // Array to hold selected time slots
@@ -433,46 +431,57 @@ function updateAvailableTimes() {
 }
 
 
-// Stopwatch for active bookings
 function updateStopwatch() {
     document.querySelectorAll('.stopwatch').forEach(stopwatch => {
         const bookingId = stopwatch.dataset.bookingId;
         const duration = parseInt(stopwatch.dataset.duration);
         const timeRemainingEl = stopwatch.querySelector('.time-remaining');
-        const startBtn = stopwatch.querySelector('.start-btn');
+        const startDate = stopwatch.dataset.startDate;
+        const startTime = stopwatch.dataset.startTime;
 
-        // Show or hide start button based on user role (from injected variable USER_ROLE)
-        if (startBtn) {
-            if (typeof USER_ROLE !== 'undefined' && USER_ROLE === 'admin') {
-                startBtn.style.display = 'inline-block';
-                startBtn.disabled = false;
-            } else {
-                startBtn.style.display = 'none';
-            }
-        }
+        console.log(`BookingId: ${bookingId}, startDate: ${startDate}, startTime: ${startTime}, duration: ${duration}`);
 
-        // Get start time from local storage (only if user has started)
-        let startTime = localStorage.getItem(`start_${bookingId}`);
-        if (!startTime) {
-            // If not started, show full duration
-            const hours = Math.floor(duration / 60);
-            const minutes = duration % 60;
-            timeRemainingEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+        if (!startDate || !startTime) {
+            console.log('Missing startDate or startTime');
+            timeRemainingEl.textContent = '--:--:--';
             return;
         }
 
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const remaining = duration * 60 - elapsed;
+        const startDateTimeStr = `${startDate}T${startTime}`;
+        const startDateTime = new Date(startDateTimeStr);
+        const now = new Date();
 
-        if (remaining <= 0) {
-            timeRemainingEl.textContent = '00:00:00';
-            // Auto complete booking
-            completeBooking(bookingId);
+        console.log(`startDateTimeStr: ${startDateTimeStr}, startDateTime: ${startDateTime.toString()}, now: ${now.toString()}`);
+
+        if (isNaN(startDateTime.getTime())) {
+            console.log('Invalid startDateTime format');
+            timeRemainingEl.textContent = '--:--:--';
+            return;
+        }
+
+        const endTime = new Date(startDateTime.getTime() + duration * 60000);
+
+        if (now < startDateTime) {
+            // Countdown to session start
+            const diff = Math.floor((startDateTime - now) / 1000);
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            timeRemainingEl.textContent = `Mulai: ${hours.toString().padStart(2, '0')}:${minutes
+                .toString()
+                .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        } else if (now >= startDateTime && now <= endTime) {
+            // Countdown to session end
+            const diff = Math.floor((endTime - now) / 1000);
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            timeRemainingEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes
+                .toString()
+                .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         } else {
-            const hours = Math.floor(remaining / 3600);
-            const minutes = Math.floor((remaining % 3600) / 60);
-            const seconds = remaining % 60;
-            timeRemainingEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // Session ended
+            timeRemainingEl.textContent = 'Sesi selesai';
         }
     });
 }
@@ -531,6 +540,9 @@ function startSession(bookingId) {
                 timer: 3000,
                 showConfirmButton: false
             });
+
+            // Immediately update stopwatch display after session start
+            updateStopwatch();
         } else {
             Swal.fire('Error', data.message || 'Failed to start session', 'error');
         }

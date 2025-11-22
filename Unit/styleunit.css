@@ -305,6 +305,19 @@
   to { transform: scale(1); opacity: 1 }
 }
 
+/* Booking Modal Title */
+#bookingModal .modal-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4338ca; /* Using a bold blue shade consistent with existing palette */
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Close Button */
 .close {
   position: absolute;
@@ -422,7 +435,7 @@
   background: #16a34a;
   color: white;
   border: none;
-  font-size: 1px;
+  font-size: 5px;
   cursor: pointer;
   font-weight: 600;
   transition: .28s;
@@ -446,6 +459,13 @@
   cursor: not-allowed;
 }
 
+.total-price {
+  font-weight: 900;
+  color: #6366f1; 
+  font-size: 1.3rem;
+  margin-top: 10px;
+}
+
 /* Submit Button */
 .button-container {
   display: flex;
@@ -453,12 +473,12 @@
   margin-top: 20px;
 }
 #bookingForm button {
-  width: 50%;
-  padding: 16px;
+  width: 100%;
+  padding: 18px;
   background: linear-gradient(135deg,#10b981,#059669);
   border-radius: 14px;
   color: white;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   border: none;
   cursor: pointer;
