@@ -45,6 +45,11 @@ body {
     border-radius: 12px;
 }
 
+.nav-tabs {
+    position: relative;
+    z-index: 1060;
+}
+
 /* === SEARCH BAR & BUTTON GROUP === */
 .d-flex.gap-2 form input {
     width: 220px;
