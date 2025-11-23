@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Cancel',
                 cancelButtonText: 'Batal'
+                
             }).then(result => {
                 if (result.isConfirmed) {
                     // Create form and submit POST to cancel_booking.php

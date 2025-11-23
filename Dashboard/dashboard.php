@@ -80,6 +80,7 @@ $paymentHistoryQuery = $connection->query("
 $successMsg = $_SESSION['success_message'] ?? null;
 $errorMsg = $_SESSION['error_message'] ?? null;
 unset($_SESSION['success_message'], $_SESSION['error_message']);
+
 ?>
 
 <!doctype html>
@@ -446,7 +447,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <div id="alertData" data-success-message="<?= htmlspecialchars($successMsg ?? '') ?>" data-error-message="<?= htmlspecialchars($errorMsg ?? '') ?>"></div>
-
+    
   <?php include __DIR__ . '/user_modals.php'; ?>
   <?php include __DIR__ . '/rooms_modals.php'; ?>
   <?php include __DIR__ . '/inventory_modals.php'; ?>
