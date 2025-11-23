@@ -14,14 +14,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
 </head>
 <body>
 <script>
-window.onload = () => Swal.fire({
-    icon: 'error',
-    title: 'Akses Ditolak!',
-    text: 'Anda bukan admin.',
-    confirmButtonColor: '#d33'
-}).then(() => {
-    window.location.href = '../index.php';
-});
 </script>
 </body>
 </html>";
@@ -96,7 +88,10 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Dashboard Pemesanan Billing PlayStation</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="..." crossorigin="anonymous">
+
   <link rel="stylesheet" href="styledashboard.css">
   <style>
     /* Fix to allow nav tabs clickable despite modal shown */
@@ -216,7 +211,12 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                           data-status="<?= $row['status'] ?>">
                           Edit
                         </button>
-                        <a href="delete_user.php?id=<?= $row['id'] ?>" class="btn btn-danger btn-sm btnHapus">Hapus</a>
+                        <button type="button"
+                                class="btn btn-danger btn-sm btnDeleteUser"
+                                data-id="<?= $row['id'] ?>"
+                                data-username="<?= htmlspecialchars($row['username']) ?>">
+                          Hapus
+                        </button>
                       </td>
                     </tr>
                   <?php endwhile; ?>
@@ -425,185 +425,32 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </table>
           </div>
 
-        </div> </div> </div> <div id="modalAddUser" class="modal">
-    <div class="modal-content">
-        <h3>Tambah User</h3>
-        <form id="addUserForm">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit" class="btn-primary">Tambah</button>
-        <button type="button" class="btn-secondary" id="closeModal">Batal</button>
-        </form>
-    </div>
-    </div>
+  
 
-  <div id="modalEditUser" class="modal">
-    <div class="modal-content">
-      <h3>Edit User</h3>
-      <form id="editUserForm" method="POST" action="edit_user.php">
-        <input type="hidden" name="id" id="editId">
-        <input type="text" name="username" id="editUsername" placeholder="Username" required>
-        <input type="email" name="email" id="editEmail" placeholder="Email" required>
-        <input type="password" name="password" id="editPassword" placeholder="Password baru (opsional)">
-        <select name="status" id="editStatus" required>
-          <option value="online">Online</option>
-          <option value="offline">Offline</option>
-        </select>
-        <button type="submit" class="btn-primary">Simpan Perubahan</button>
-        <button type="button" class="btn-secondary" id="closeEditModal">Batal</button>
-      </form>
-    </div>
-  </div>
 
-  <div id="modalEditInventory" class="modal">
-    <div class="modal-content">
-      <h3>Edit Inventory Quantity</h3>
-      <form id="editInventoryForm" method="POST" action="edit_inventory.php">
-        <input type="hidden" name="id" id="editInventoryId">
-        <input type="text" id="editInventoryType" placeholder="Type" readonly>
-        <input type="number" name="quantity_available" id="editInventoryQuantity" placeholder="Quantity Available" required min="0">
-        <button type="submit" class="btn-primary">Update Quantity</button>
-        <button type="button" class="btn-secondary" id="closeEditInventoryModal">Batal</button>
-      </form>
-    </div>
-  </div>
 
-  <div class="modal fade" id="roomModal" tabindex="-1" aria-labelledby="roomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="roomModalLabel">Room Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <h6>Room Information</h6>
-            <p><strong>Name:</strong> <span id="modalRoomName"></span></p>
-            <p><strong>Type:</strong> <span id="modalRoomType"></span></p>
-            <p><strong>Status:</strong> <span id="modalRoomStatus" class="badge"></span></p>
-          </div>
-
-          <div class="mb-3">
-            <h6>Today's Bookings</h6>
-            <div id="modalBookings">
-              <p class="text-muted">Loading...</p>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6>Available Time Slots (Today)</h6>
-            <div id="modalSlots">
-              <p class="text-muted">Loading...</p>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6>Actions</h6>
-            <div class="d-flex flex-wrap gap-2">
-              <button class="btn btn-success" id="btnSetAvailable">Set Available</button>
-              <button class="btn btn-danger" id="btnSetBooked">Set Booked</button>
-              <button class="btn btn-info" id="btnViewHistory">View Booking History</button>
-              <button class="btn btn-primary" id="btnEditRoom">Edit Room</button>
-              <button class="btn btn-danger" id="btnDeleteRoom">Delete Room</button>
-            </div>
-          </div>
-
-          <div id="editRoomForm" style="display: none;">
-            <h6>Edit Room</h6>
-            <form id="formEditRoom">
-              <input type="hidden" id="editRoomId">
-              <div class="mb-3">
-                <label for="editRoomName" class="form-label">Name</label>
-                <input type="text" class="form-control" id="editRoomName" required>
-              </div>
-              <div class="mb-3">
-                <label for="editRoomType" class="form-label">Type</label>
-                <input type="text" class="form-control" id="editRoomType" required>
-              </div>
-              <button type="submit" class="btn btn-success">Save Changes</button>
-              <button type="button" class="btn btn-secondary" id="cancelEdit">Cancel</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="roomHistoryModal" tabindex="-1" aria-labelledby="roomHistoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="roomHistoryModalLabel">Booking History</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Duration</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="historyTableBody">
-              <tr>
-                <td colspan="5" class="text-center">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <style>
+    /* Fix to allow nav tabs clickable despite modal shown */
+    .nav-tabs {
+      position: relative;
+      z-index: 1050; /* set lower than modal backdrop */
+    }
+    .modal-backdrop {
+      z-index: 1060 !important; /* above nav-tabs */
+    }
+    .modal {
+      z-index: 1070 !important; /* above backdrop and nav-tabs */
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="scriptdashboard.js"></script>
 
-  <script>
-  // === SWEETALERT UNTUK PESAN ===
-  <?php /*
-  <?php if ($successMsg): ?>
-      Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: '<?= addslashes($successMsg) ?>',
-          confirmButtonColor: '#3085d6',
-      });
-  <?php elseif ($errorMsg): ?>
-      Swal.fire({
-          icon: 'error',
-          title: 'Oops!',
-          text: '<?= addslashes($errorMsg) ?>',
-          confirmButtonColor: '#d33',
-      });
-  <?php endif; ?>
-  */ ?>
+  <div id="alertData" data-success-message="<?= htmlspecialchars($successMsg ?? '') ?>" data-error-message="<?= htmlspecialchars($errorMsg ?? '') ?>"></div>
 
-  // === SWEETALERT UNTUK KONFIRMASI HAPUS ===
-  document.querySelectorAll('.btnHapus').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const url = this.getAttribute('href');
-      Swal.fire({
-        title: 'Yakin ingin menghapus?',
-        text: "Data user ini akan dihapus permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-      }).then(result => {
-        if (result.isConfirmed) window.location.href = url;
-      });
-    });
-  });
+  <?php include __DIR__ . '/user_modals.php'; ?>
+  <?php include __DIR__ . '/rooms_modals.php'; ?>
+  <?php include __DIR__ . '/inventory_modals.php'; ?>
 
-
-  </script>
 </body>
 </html>

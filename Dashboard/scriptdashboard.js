@@ -1,4 +1,3 @@
-// === ANIMASI CARD ===
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Dashboard loaded ✅");
 
@@ -14,33 +13,171 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150 * i);
     });
 
-    // Custom modal handling Dihapus. Kini menggunakan Bootstrap JS API.
-
-    // Dapatkan elemen modal dan inisialisasi objek Bootstrap Modal
+    // --- CUSTOM MODAL IMPLEMENTATION ---
+    // Get modals
     const modalAddUser = document.getElementById("modalAddUser");
     const modalEditUser = document.getElementById("modalEditUser");
-    const modalEditInventory = document.getElementById("modalEditInventory");
+    const modalDeleteUser = document.getElementById("modalDeleteUser");
 
-    let addUserModalInstance = null;
-    if (modalAddUser) {
-        addUserModalInstance = new bootstrap.Modal(modalAddUser);
-    }
-    let editUserModalInstance = null;
-    if (modalEditUser) {
-        editUserModalInstance = new bootstrap.Modal(modalEditUser);
-    }
-    let editInventoryModalInstance = null;
-    if (modalEditInventory) {
-        editInventoryModalInstance = new bootstrap.Modal(modalEditInventory);
+
+    // Utility to open modal
+    function openModal(modal) {
+        if (!modal) return;
+        modal.removeAttribute('hidden');
+        // Removed inert attribute setting for quick fix as per user request
+        // Focus first focusable element
+        const focusable = modal.querySelector('input, select, textarea, button');
+        if (focusable) focusable.focus();
+        document.body.style.overflow = 'hidden'; // Disable background scroll
     }
 
-    // Open add user modal
+    // Utility to close modal
+    function closeModal(modal) {
+        if (!modal) return;
+        modal.setAttribute('hidden', '');
+        // Removed inert attribute clearing for quick fix as per user request
+        document.body.style.overflow = ''; // Restore scroll
+    }
+
+    // Attach close handlers to elements with data-modal-close attribute
+    document.querySelectorAll('[data-modal-close]').forEach(el => {
+        el.addEventListener('click', () => {
+            const modal = el.closest('.custom-modal');
+            closeModal(modal);
+        });
+    });
+
+    // Open Add User modal
     const openAddBtn = document.getElementById("btnAddUser");
-    if (openAddBtn && addUserModalInstance) {
+    if (openAddBtn && modalAddUser) {
         openAddBtn.addEventListener("click", () => {
-            addUserModalInstance.show(); // Menggunakan Bootstrap API
+            openModal(modalAddUser);
         });
     }
+
+    // New alert container inside Add User modal
+    const modalAddUserAlert = document.getElementById("modalAddUserAlert");
+    const addUserForm = document.getElementById("addUserForm");
+
+    // Handle add user form submit via AJAX with alert display and table update
+    if (addUserForm) {
+        addUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(addUserForm);
+
+            try {
+                const res = await fetch("add_user.php", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // Show alert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || 'User berhasil ditambahkan ✅',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
+
+                    // Close modal immediately
+                    closeModal(modalAddUser);
+
+                    // Reset form
+                    addUserForm.reset();
+
+                    // Optimistic UI: add new user row to user table without reloading page
+                    const userTableBody = document.querySelector("#usersTable tbody");
+                    if (userTableBody) {
+                        // Create new row element
+                        const tr = document.createElement('tr');
+                        // Assuming the data.response includes new user id and fields for display
+                        // If backend does not return these, you may need to reload page instead
+                        tr.innerHTML = `
+                            <td>new</td> <!-- Ideally new user ID -->
+                            <td>${formData.get('username')}</td>
+                            <td>${formData.get('email')}</td>
+                            <td>0</td> <!-- Default saldo -->
+                            <td>offline</td> <!-- Default status -->
+                            <td>
+                                <!-- Action buttons like Edit/Delete if needed -->
+                                <button class="btn btn-sm btn-primary btnEditUser" data-username="${formData.get('username')}" data-email="${formData.get('email')}" data-status="offline">Edit</button>
+                                <button class="btn btn-sm btn-danger btnDeleteUser" data-username="${formData.get('username')}">Delete</button>
+                            </td>
+                        `;
+                        userTableBody.appendChild(tr);
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Gagal menambahkan user!',
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan jaringan atau server.',
+                });
+            }
+        });
+    }
+
+    // New code added for centralized alerts from #alertData
+    const alertData = document.getElementById("alertData");
+    if (alertData) {
+        const successMsg = alertData.getAttribute("data-success-message");
+        const errorMsg = alertData.getAttribute("data-error-message");
+
+        if (successMsg) {
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: successMsg,
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        }
+
+        if (errorMsg) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: errorMsg,
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        }
+    }
+
+    // Add delete confirmation for all buttons/links with class .btnHapus
+    document.querySelectorAll(".btnHapus").forEach((btn) => {
+        btn.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const href = btn.getAttribute("href") || btn.dataset.href;
+            if (!href) return;
+
+            Swal.fire({
+                title: "Confirm Delete",
+                text: "Are you sure you want to delete this item? This action cannot be undone.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "Cancel",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with redirect
+                    window.location.href = href;
+                }
+            });
+        });
+    });
 
     // Handle add user form submit via AJAX
     const formAdd = document.getElementById("addUserForm");
@@ -56,27 +193,44 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: formData,
                 });
 
-                const data = await res.text();
-                console.log("Response:", data);
-
-                // Tutup modal sebelum SweetAlert jika diperlukan
-                if (addUserModalInstance) {
-                    addUserModalInstance.hide();
+                // Clone response for safe read
+                const resClone = res.clone();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    // Response is not valid JSON
+                    const text = await resClone.text();
+                    console.error("Non-JSON response from add_user.php:", text);
+                    Swal.fire("Error", "Response from server is not valid JSON.", "error");
+                    return;
                 }
 
-                Swal.fire({
-                    title: "Berhasil!",
-                    text: "User berhasil ditambahkan ✅",
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false,
-                }).then(() => {
-                    setTimeout(() => location.reload(), 100); // Reload setelah SweetAlert hilang
-                });
+                console.log("Response:", data);
 
+                if (addUserModalInstance) {
+                    addUserModalInstance.hide();
+                    // Explicitly focus on add button after modal hides
+                    const openAddBtn = document.getElementById("btnAddUser");
+                    if (openAddBtn) openAddBtn.focus();
+                }
+
+                if (data.success) {
+                    Swal.fire({
+                        title: "Berhasil!",
+                        text: data.message || "User berhasil ditambahkan ✅",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        setTimeout(() => location.reload(), 100); // Reload setelah SweetAlert hilang
+                    });
+                } else {
+                    Swal.fire("Error", data.message || "Gagal menambahkan user!", "error");
+                }
             } catch (err) {
                 console.error('Error adding user:', err);
-                Swal.fire("Error", "Gagal menambahkan user!", "error");
+                Swal.fire("Error", "Gagal koneksi atau respons tidak valid!", "error");
             }
         });
     }
@@ -86,14 +240,81 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
 
+            // Mengisi data ke form
             document.getElementById("editId").value = btn.dataset.id;
             document.getElementById("editUsername").value = btn.dataset.username;
             document.getElementById("editEmail").value = btn.dataset.email;
             document.getElementById("editStatus").value = btn.dataset.status;
 
+            // Reset password field
+            document.getElementById("editPassword").value = '';
+
             if (editUserModalInstance) {
                 editUserModalInstance.show(); // Menggunakan Bootstrap API
             }
+        });
+    });
+    
+    // Handle edit user form submit (biarkan POST biasa jika logic edit_user.php kompleks/redirect)
+    // Jika Anda ingin menggunakan AJAX di sini, Anda harus menambahkan listener serupa dengan addUserForm
+
+    // Delete user modal setup
+    let userIdToDelete = null;
+    let userRowToDelete = null;
+
+    document.querySelectorAll(".btnDeleteUser").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            userIdToDelete = btn.dataset.id;
+            userRowToDelete = btn.closest("tr");
+            const username = btn.dataset.username || "";
+            document.getElementById("deleteUsername").textContent = username;
+
+            if (deleteUserModalInstance) {
+                deleteUserModalInstance.show();
+            }
+        });
+    });
+
+    document.getElementById("confirmDeleteUserBtn").addEventListener("click", () => {
+        if (!userIdToDelete) return;
+
+        fetch("delete_user.php?id=" + encodeURIComponent(userIdToDelete), {
+            method: "GET", // Menggunakan GET sesuai kode Anda sebelumnya
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (deleteUserModalInstance) {
+                    deleteUserModalInstance.hide();
+                }
+                Swal.fire({
+                    icon: "success",
+                    title: "Deleted!",
+                    text: data.message || `User ${document.getElementById("deleteUsername").textContent} berhasil dihapus.`,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Pilihan: Reload setelah delete
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Gagal!",
+                    text: data.message || "Gagal menghapus user.",
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Terjadi kesalahan: " + err.message,
+            });
         });
     });
 
@@ -104,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const id = btn.dataset.id;
             const type = btn.dataset.type || '';
-            const quantity = btn.dataset.quantity || '';
+            const quantity = btn.dataset.quantity || ''; // Harus ada di data-* tombol PHP
 
             document.getElementById("editInventoryId").value = id;
             document.getElementById("editInventoryType").value = type;
@@ -115,8 +336,79 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+    
+    // === Handle form edit Inventory submit via AJAX (NEW) ===
+    const formEditInventory = document.getElementById("editInventoryForm");
+    if (formEditInventory) {
+        formEditInventory.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-    // Booking management code unchanged, SweetAlert2 usage
+            const formData = new FormData(formEditInventory);
+            
+            try {
+                const res = await fetch(formEditInventory.action, {
+                    method: "POST",
+                    body: formData,
+                });
+
+                // Asumsi edit_inventory.php mengembalikan JSON
+                const data = await res.json(); 
+
+                // Tutup modal
+                if (editInventoryModalInstance) {
+                    editInventoryModalInstance.hide();
+                }
+
+                if (data.success) {
+                    Swal.fire({
+                        title: "Berhasil!",
+                        text: data.message || "Quantity inventaris berhasil diupdate.",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        setTimeout(() => location.reload(), 100); // Reload untuk update tabel
+                    });
+                } else {
+                    Swal.fire("Error", data.message || "Gagal mengupdate inventaris!", "error");
+                }
+            } catch (err) {
+                console.error('Error updating inventory:', err);
+                Swal.fire("Error", "Gagal koneksi ke server atau respons tidak valid.", "error");
+            }
+        });
+    }
+
+    // --- Booking management helper function (dari saran sebelumnya) ---
+    function handleBookingAction(bookingId, actionUrl, actionText, successMessage) {
+        Swal.fire({
+            title: `${actionText} Booking?`,
+            text: `This will ${actionText.toLowerCase()} the booking permanently.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `Yes, ${actionText}`,
+            cancelButtonText: 'No'
+        }).then(result => {
+            if (result.isConfirmed) {
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId: bookingId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Success', successMessage, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message || `Failed to ${actionText.toLowerCase()} booking.`, 'error');
+                    }
+                })
+                .catch(err => Swal.fire('Error', 'Connection error: ' + err.message, 'error'));
+            }
+        });
+    }
+
+    // Booking management event listeners (menggunakan helper function)
     document.querySelectorAll('.btnEditBooking').forEach(btn => {
         btn.addEventListener('click', function() {
             const bookingId = this.dataset.id;
@@ -164,7 +456,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         } else {
                             Swal.fire('Error', data.message, 'error');
                         }
-                    });
+                    })
+                    .catch(err => Swal.fire('Error', 'Connection error: ' + err.message, 'error'));
                 }
             });
         });
@@ -172,63 +465,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll('.btnCancelBooking').forEach(btn => {
         btn.addEventListener('click', function() {
-            const bookingId = this.dataset.id;
-
-            Swal.fire({
-                title: 'Cancel Booking?',
-                text: 'This will cancel the booking permanently.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Cancel',
-                cancelButtonText: 'No'
-            }).then(result => {
-                if (result.isConfirmed) {
-                    fetch('cancel_booking.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ bookingId: bookingId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire('Success', 'Booking cancelled successfully', 'success').then(() => location.reload());
-                        } else {
-                            Swal.fire('Error', data.message, 'error');
-                        }
-                    });
-                }
-            });
+            handleBookingAction(this.dataset.id, 'cancel_booking.php', 'Cancel', 'Booking cancelled successfully');
         });
     });
 
     document.querySelectorAll('.btnDeleteBooking').forEach(btn => {
         btn.addEventListener('click', function() {
-            const bookingId = this.dataset.id;
-
-            Swal.fire({
-                title: 'Delete Booking?',
-                text: 'This will permanently delete the booking from the database.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'No'
-            }).then(result => {
-                if (result.isConfirmed) {
-                    fetch('delete_booking.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ bookingId: bookingId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire('Success', 'Booking deleted successfully', 'success').then(() => location.reload());
-                        } else {
-                            Swal.fire('Error', data.message, 'error');
-                        }
-                    });
-                }
-            });
+            handleBookingAction(this.dataset.id, 'delete_booking.php', 'Delete', 'Booking deleted successfully');
         });
     });
 
@@ -266,10 +509,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Room card click to open modal (menggunakan roomModalInstance yang sudah diinisialisasi)
     document.querySelectorAll('#rooms .room-card').forEach(card => {
         card.addEventListener('click', function() {
             const roomId = this.dataset.roomId;
             if (!roomId) return;
+            
+            // Sembunyikan form edit saat modal dibuka
+            document.getElementById('editRoomForm').style.display = 'none';
 
             fetch(`get_room_modal.php?room_id=${roomId}`)
             .then(response => response.json())
@@ -301,13 +548,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     slotsDiv.innerHTML = '<p>No available slots.</p>';
                 }
-
+                
+                // Isi form Edit Room
                 document.getElementById('editRoomId').value = data.room.id;
                 document.getElementById('editRoomName').value = data.room.name;
                 document.getElementById('editRoomType').value = data.room.type;
 
-                const modal = new bootstrap.Modal(document.getElementById('roomModal'));
-                modal.show();
+                // Tampilkan modal menggunakan instance global
+                if (roomModalInstance) {
+                    roomModalInstance.show();
+                }
             })
             .catch(err => {
                 console.error('Error fetching room data:', err);
@@ -428,36 +678,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.getElementById('btnEditRoom').addEventListener('click', function() {
-        document.getElementById('editRoomForm').style.display = 'block';
+        // Use Bootstrap Collapse or class toggle instead of display:block for accessibility
+        const editRoomForm = document.getElementById('editRoomForm');
+        if (editRoomForm.classList.contains('d-none')) {
+            editRoomForm.classList.remove('d-none');
+            // Focus first input for better accessibility
+            const firstInput = editRoomForm.querySelector('input, select, textarea, button');
+            if (firstInput) firstInput.focus();
+        }
     });
 
     document.getElementById('cancelEdit').addEventListener('click', function() {
-        document.getElementById('editRoomForm').style.display = 'none';
+        const editRoomForm = document.getElementById('editRoomForm');
+        if (!editRoomForm.classList.contains('d-none')) {
+            editRoomForm.classList.add('d-none');
+            // Set focus back to edit button
+            const btnEditRoom = document.getElementById('btnEditRoom');
+            if (btnEditRoom) btnEditRoom.focus();
+        }
     });
 
+    // Handle form Edit Room submit via AJAX (FIXED: Expecting JSON response)
     document.getElementById('formEditRoom').addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
+        
+        // Sembunyikan form edit saat submit
+        document.getElementById('editRoomForm').style.display = 'none';
 
         fetch('edit_room.php', {
             method: 'POST',
             body: formData
         })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                return response.text();
-            }
-        })
+        .then(response => response.json()) // Harapkan JSON dari server
         .then(data => {
-            if (data) {
-                Swal.fire('Error', 'Failed to update room', 'error');
+            // Tutup Room Modal
+            if (roomModalInstance) {
+                roomModalInstance.hide();
+            }
+
+            if (data.success) {
+                Swal.fire('Success', data.message || 'Room updated successfully', 'success')
+                .then(() => location.reload()); // Reload untuk update data di dashboard
+            } else {
+                Swal.fire('Error', data.message || 'Failed to update room', 'error');
             }
         })
         .catch(err => {
             console.error('Error updating room:', err);
-            Swal.fire('Error', 'Failed to update room', 'error');
+            Swal.fire('Error', 'Failed to communicate with server.', 'error');
         });
     });
 
@@ -480,16 +749,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        return response.text();
-                    }
-                })
+                .then(response => response.json()) // Harapkan JSON dari server
                 .then(data => {
-                    if (data) {
-                        Swal.fire('Error', 'Failed to delete room', 'error');
+                    // Tutup Room Modal
+                    if (roomModalInstance) {
+                        roomModalInstance.hide();
+                    }
+                    
+                    if (data.success) {
+                        Swal.fire('Success', data.message || 'Room deleted successfully', 'success')
+                        .then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to delete room', 'error');
                     }
                 })
                 .catch(err => {
