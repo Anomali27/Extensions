@@ -1,11 +1,12 @@
 <?php
 require_once '../config/config.php';
 session_start();
-ob_start(); // Start output buffering to prevent unwanted output
 
-// 🔒 Proteksi hanya admin
+// Proteksi hanya admin
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        http_response_code(401);
+        header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'Akses ditolak! Anda bukan admin.']);
         exit;
     }
@@ -33,9 +34,8 @@ if ($username && $email && $password) {
     $stmt->close();
 }
 
-ob_end_clean(); // Clean output buffer before sending json
-
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    http_response_code($response['success'] ? 200 : 500);
     header('Content-Type: application/json');
     echo json_encode($response);
     exit;

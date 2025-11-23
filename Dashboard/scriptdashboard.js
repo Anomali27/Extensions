@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalEditUser = document.getElementById("modalEditUser");
     const modalDeleteUser = document.getElementById("modalDeleteUser");
 
+    // Initialize Bootstrap modal instances
+    const addUserModalInstance = modalAddUser ? new bootstrap.Modal(modalAddUser) : null;
+    const editUserModalInstance = modalEditUser ? new bootstrap.Modal(modalEditUser) : null;
+    const deleteUserModalInstance = modalDeleteUser ? new bootstrap.Modal(modalDeleteUser) : null;
+
 
     // Utility to open modal
     function openModal(modal) {
@@ -59,73 +64,64 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalAddUserAlert = document.getElementById("modalAddUserAlert");
     const addUserForm = document.getElementById("addUserForm");
 
-    // Handle add user form submit via AJAX with alert display and table update
-    if (addUserForm) {
-        addUserForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
+    // Handle add user form submit via AJAX
+    const formAddElement = document.getElementById("addUserForm");
+    if (formAddElement) {
+        formAddElement.removeEventListener("submit", formAddElement.submitListener);
+    }
+    formAddElement.submitListener = async function(e) {
+        e.preventDefault();
 
-            const formData = new FormData(addUserForm);
+        const formData = new FormData(formAddElement);
 
+        try {
+            const res = await fetch("add_user.php", {
+                method: "POST",
+                body: formData,
+            });
+
+            // Clone response for safe read
+            const resClone = res.clone();
+            let data;
             try {
-                const res = await fetch("add_user.php", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                const data = await res.json();
-
-                if (data.success) {
-                    // Show alert
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message || 'User berhasil ditambahkan ✅',
-                        timer: 1500,
-                        showConfirmButton: false,
-                    });
-
-                    // Close modal immediately
-                    closeModal(modalAddUser);
-
-                    // Reset form
-                    addUserForm.reset();
-
-                    // Optimistic UI: add new user row to user table without reloading page
-                    const userTableBody = document.querySelector("#usersTable tbody");
-                    if (userTableBody) {
-                        // Create new row element
-                        const tr = document.createElement('tr');
-                        // Assuming the data.response includes new user id and fields for display
-                        // If backend does not return these, you may need to reload page instead
-                        tr.innerHTML = `
-                            <td>new</td> <!-- Ideally new user ID -->
-                            <td>${formData.get('username')}</td>
-                            <td>${formData.get('email')}</td>
-                            <td>0</td> <!-- Default saldo -->
-                            <td>offline</td> <!-- Default status -->
-                            <td>
-                                <!-- Action buttons like Edit/Delete if needed -->
-                                <button class="btn btn-sm btn-primary btnEditUser" data-username="${formData.get('username')}" data-email="${formData.get('email')}" data-status="offline">Edit</button>
-                                <button class="btn btn-sm btn-danger btnDeleteUser" data-username="${formData.get('username')}">Delete</button>
-                            </td>
-                        `;
-                        userTableBody.appendChild(tr);
-                    }
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Gagal menambahkan user!',
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan jaringan atau server.',
-                });
+                data = await res.json();
+            } catch (jsonErr) {
+                // Response is not valid JSON
+                const text = await resClone.text();
+                console.error("Non-JSON response from add_user.php:", text);
+                Swal.fire("Error", "Response from server is not valid JSON.", "error");
+                return;
             }
-        });
+
+            console.log("Response:", data);
+
+            if (addUserModalInstance) {
+                addUserModalInstance.hide();
+                // Explicitly focus on add button after modal hides
+                const openAddBtn = document.getElementById("btnAddUser");
+                if (openAddBtn) openAddBtn.focus();
+            }
+
+            if (data.success) {
+                Swal.fire({
+                    title: "Berhasil!",
+                    text: data.message || "User berhasil ditambahkan ✅",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                }).then(() => {
+                    setTimeout(() => location.reload(), 100); // Reload after SweetAlert closes
+                });
+            } else {
+                Swal.fire("Error", data.message || "Gagal menambahkan user!", "error");
+            }
+        } catch (err) {
+            console.error('Error adding user:', err);
+            Swal.fire("Error", "Gagal koneksi atau respons tidak valid!", "error");
+        }
+    };
+    if (formAddElement) {
+        formAddElement.addEventListener("submit", formAddElement.submitListener);
     }
 
     // New code added for centralized alerts from #alertData
