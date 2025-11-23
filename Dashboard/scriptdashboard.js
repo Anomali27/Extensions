@@ -55,8 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Remove AJAX submit handler for Add User form, allow normal form submit for page reload and backend handling
-
     // User edit modal open on edit buttons
     document.querySelectorAll(".btnEditUser").forEach((btn) => {
         btn.addEventListener("click", (e) => {
@@ -71,13 +69,34 @@ document.addEventListener("DOMContentLoaded", () => {
             // Reset password field
             document.getElementById("editPassword").value = '';
 
-            if (editUserModalInstance) {
-                editUserModalInstance.show(); // Menggunakan Bootstrap API
-            }
+            // Use custom openModal for the edit user modal
+            openModal(modalEditUser);
         });
     });
-    
-    // Other unrelated AJAX or booking, inventory, rooms management code left untouched for now
+
+    // Add SweetAlert2 confirm dialog on delete user links
+    document.querySelectorAll(".btnDeleteUserLink").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const href = btn.getAttribute("href");
+            const username = btn.closest("tr")?.querySelector("td:nth-child(2)")?.textContent || "this user";
+
+            Swal.fire({
+                title: 'Konfirmasi Hapus User',
+                text: `Apakah Anda yakin ingin menghapus user ${username}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
 
     // SweetAlert2 usage for centralized alerts from #alertData
     const alertData = document.getElementById("alertData");

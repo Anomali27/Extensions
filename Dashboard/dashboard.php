@@ -213,7 +213,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                         </button>
                         <a href="delete_user.php?id=<?= $row['id'] ?>"
                            class="btn btn-danger btn-sm btnDeleteUserLink"
-                           onclick="return confirm('Apakah Anda yakin ingin menghapus user <?= htmlspecialchars($row['username']) ?>?');">
+                           >
                           Hapus
                         </a>
                       </td>
@@ -226,7 +226,204 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </table>
           </div>
 
-          <!-- Other tabs remain unchanged, omitted here for brevity -->
+          <div class="tab-pane fade" id="bookings" role="tabpanel" aria-labelledby="bookings-tab">
+            <table class="table table-hover table-bordered text-center align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Room</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $bookingQuery = $connection->query("
+                    SELECT o.id, u.username, r.name as room_name, o.start_date, o.start_time, o.duration, o.status
+                    FROM orders o
+                    JOIN users u ON o.user_id = u.id
+                    JOIN rooms r ON o.room_id = r.id
+                    WHERE o.status IN ('active', 'pending')
+                    ORDER BY o.start_date DESC, o.start_time DESC
+                    LIMIT 50
+                ");
+                if ($bookingQuery && $bookingQuery->num_rows > 0):
+                  while ($row = $bookingQuery->fetch_assoc()):
+                ?>
+                  <tr>
+                    <td><?= $row['id'] ?></td>
+                    <td><?= htmlspecialchars($row['username']) ?></td>
+                    <td><?= htmlspecialchars($row['room_name']) ?></td>
+                    <td><?= $row['start_date'] ?></td>
+                    <td><?= $row['start_time'] ?></td>
+                    <td><?= $row['duration'] ?> min</td>
+                    <td>
+                      <span class="badge bg-<?= $row['status'] == 'active' ? 'success' : ($row['status'] == 'completed' ? 'secondary' : 'warning') ?>">
+                        <?= ucfirst($row['status']) ?>
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn btn-info btn-sm btnEditBooking"
+                              data-id="<?= $row['id'] ?>"
+                              data-date="<?= $row['start_date'] ?>"
+                              data-time="<?= $row['start_time'] ?>"
+                              data-duration="<?= $row['duration'] ?>">
+                        Edit Time
+                      </button>
+                      <button class="btn btn-warning btn-sm btnCancelBooking" data-id="<?= $row['id'] ?>">
+                        Cancel
+                      </button>
+                      <button class="btn btn-danger btn-sm btnDeleteBooking" data-id="<?= $row['id'] ?>">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="8" class="text-muted">No active bookings found.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tab-pane fade" id="rooms" role="tabpanel" aria-labelledby="rooms-tab">
+
+            <div class="row g-4">
+              <?php
+              $roomQuery = $connection->query("SELECT id, name, type, status FROM rooms ORDER BY id");
+              if ($roomQuery && $roomQuery->num_rows > 0):
+                while ($row = $roomQuery->fetch_assoc()):
+              ?>
+
+              <div class="col-md-3"> <div class="card shadow-sm h-100 room-card" data-room-id="<?= $row['id'] ?>" style="cursor: pointer;">
+
+                  <div class="card-body text-center">
+                    <h5 class="card-title fw-bold"><?= htmlspecialchars($row['name']) ?></h5>
+                    <p class="text-muted mb-1"><?= htmlspecialchars($row['type']) ?></p>
+
+                    <span class="badge fs-6" style="background-color: <?= $row['status'] == 'available' ? '#28a745' : '#dc3545' ?>; color: white;">
+                      <?= ucfirst($row['status']) ?>
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+
+              <?php endwhile; ?>
+              <?php else: ?>
+                <div class="col-12 text-center text-muted">No rooms found.</div>
+              <?php endif; ?>
+            </div>
+
+          </div>
+
+          <div class="tab-pane fade" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
+            <table class="table table-hover table-bordered text-center align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                // Mengganti $roomQuery dengan query spesifik untuk inventory jika dibutuhkan,
+                // namun jika Inventory tab menampilkan data rooms, maka query di atas sudah benar.
+                $roomQueryForInventory = $connection->query("SELECT id, name, type, status, created_at FROM rooms ORDER BY id");
+                if ($roomQueryForInventory && $roomQueryForInventory->num_rows > 0): ?>
+                  <?php while ($room = $roomQueryForInventory->fetch_assoc()): ?>
+                    <tr>
+                      <td><?= $room['id'] ?></td>
+                      <td><?= htmlspecialchars($room['name']) ?></td>
+                      <td><?= htmlspecialchars($room['type']) ?></td>
+                      <td><?= htmlspecialchars($room['status']) ?></td>
+                      <td><?= htmlspecialchars($room['created_at']) ?></td>
+                      <td>
+                        <button class="btn btn-warning btn-sm btnEditInventory" data-id="<?= $room['id'] ?>">Edit</button>
+                        <a href="delete_room.php?id=<?= $room['id'] ?>" class="btn btn-danger btn-sm btnHapus">Delete</a>
+                      </td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="6" class="text-muted">No records found.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
+
+          <div class="tab-pane fade" id="topup-history" role="tabpanel" aria-labelledby="topup-history-tab">
+            <table class="table table-hover table-bordered text-center align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if ($topupHistoryQuery && $topupHistoryQuery->num_rows > 0): ?>
+                  <?php while ($topup = $topupHistoryQuery->fetch_assoc()): ?>
+                    <tr>
+                      <td><?= $topup['id'] ?></td>
+                      <td><?= htmlspecialchars($topup['username']) ?></td>
+                      <td>Rp <?= number_format($topup['amount'], 0, ',', '.') ?></td>
+                      <td><?= htmlspecialchars($topup['method']) ?></td>
+                      <td><?= htmlspecialchars($topup['status']) ?></td>
+                      <td><?= htmlspecialchars($topup['created_at']) ?></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="6" class="text-muted">No records found.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tab-pane fade" id="payment-history" role="tabpanel" aria-labelledby="payment-history-tab">
+            <table class="table table-hover table-bordered text-center align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Room</th>
+                  <th>Duration</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if ($paymentHistoryQuery && $paymentHistoryQuery->num_rows > 0): ?>
+                  <?php while ($payment = $paymentHistoryQuery->fetch_assoc()): ?>
+                    <tr>
+                      <td><?= $payment['id'] ?></td>
+                      <td><?= htmlspecialchars($payment['username']) ?></td>
+                      <td><?= htmlspecialchars($payment['room_name']) ?></td>
+                      <td><?= $payment['duration'] ?> min</td>
+                      <td>Rp <?= number_format($payment['price'], 0, ',', '.') ?></td>
+                      <td><?= htmlspecialchars($payment['status']) ?></td>
+                      <td><?= htmlspecialchars($payment['created_at']) ?></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="7" class="text-muted">No records found.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
 
         </div>
       </div>
