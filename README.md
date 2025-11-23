@@ -84,6 +84,7 @@ Aplikasi berbasis web untuk memudahkan pemilik rental PlayStation dalam mengatur
 
 
 ## 💻 Teknologi yang Digunakan
+<div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="40" alt="javascript logo"  />
   <img width="12" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="40" alt="html5 logo"  />
@@ -95,4 +96,5 @@ Aplikasi berbasis web untuk memudahkan pemilik rental PlayStation dalam mengatur
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" height="40" alt="mysql logo"  />
   <img width="12" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" height="40" alt="figma logo"  />
+</div>
 
