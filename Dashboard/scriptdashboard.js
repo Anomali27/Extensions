@@ -17,10 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Get modals
     const modalAddUser = document.getElementById("modalAddUser");
     const modalEditUser = document.getElementById("modalEditUser");
+    const modalEditBooking = document.getElementById("modalEditBooking");
 
     // Initialize Bootstrap modal instances
     const addUserModalInstance = modalAddUser ? new bootstrap.Modal(modalAddUser) : null;
     const editUserModalInstance = modalEditUser ? new bootstrap.Modal(modalEditUser) : null;
+    const editBookingModalInstance = modalEditBooking ? new bootstrap.Modal(modalEditBooking) : null;
 
     // Utility to open modal
     function openModal(modal) {
@@ -71,6 +73,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Use custom openModal for the edit user modal
             openModal(modalEditUser);
+        });
+    });
+
+    // Booking edit modal handler
+    document.querySelectorAll(".btnEditBooking").forEach(btn => {
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+            document.getElementById("editBookingId").value = btn.dataset.id;
+            document.getElementById("editBookingDate").value = btn.dataset.date;
+            document.getElementById("editBookingTime").value = btn.dataset.time;
+            document.getElementById("editBookingDuration").value = btn.dataset.duration;
+            if (editBookingModalInstance) {
+                openModal(modalEditBooking);;
+            }
+        });
+    });
+
+    // SweetAlert confirm for cancel booking
+    document.querySelectorAll(".btnCancelBooking").forEach(btn => {
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+            const bookingId = btn.dataset.id;
+            Swal.fire({
+                title: 'Konfirmasi Cancel Booking',
+                text: `Apakah Anda yakin ingin membatalkan booking dengan ID ${bookingId}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Cancel',
+                cancelButtonText: 'Batal'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    // Create form and submit POST to cancel_booking.php
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'cancel_booking.php';
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'bookingId';
+                    input.value = bookingId;
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // SweetAlert confirm for delete booking
+    document.querySelectorAll(".btnDeleteBooking").forEach(btn => {
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+            const bookingId = btn.dataset.id;
+            Swal.fire({
+                title: 'Konfirmasi Delete Booking',
+                text: `Apakah Anda yakin ingin menghapus booking dengan ID ${bookingId}? Tindakan ini tidak dapat dibatalkan.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Batal'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    // Create form and submit POST to delete_booking.php
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'delete_booking.php';
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'bookingId';
+                    input.value = bookingId;
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         });
     });
 
