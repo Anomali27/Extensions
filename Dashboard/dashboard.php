@@ -275,12 +275,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                               data-duration="<?= $row['duration'] ?>">
                         Edit Time
                       </button>
-                      <button class="btn btn-warning btn-sm btnCancelBooking" data-id="<?= $row['id'] ?>">
-                        Cancel
-                      </button>
-                      <button class="btn btn-danger btn-sm btnDeleteBooking" data-id="<?= $row['id'] ?>">
-                        Delete
-                      </button>
+                      <button class="btn btn-warning btn-sm btnCancelBooking" data-id="<?= $row['id'] ?>">Cancel</button>
+                      <button class="btn btn-danger btn-sm btnDeleteBooking" data-id="<?= $row['id'] ?>" style="margin-left:5px;">Delete</button>
                     </td>
                   </tr>
                 <?php endwhile; ?>
@@ -444,13 +440,13 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
   </style>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="scriptdashboard.js"></script>
-
   <div id="alertData" data-success-message="<?= htmlspecialchars($successMsg ?? '') ?>" data-error-message="<?= htmlspecialchars($errorMsg ?? '') ?>"></div>
 
   <?php include __DIR__ . '/user_modals.php'; ?>
   <?php include __DIR__ . '/rooms_modals.php'; ?>
   <?php include __DIR__ . '/inventory_modals.php'; ?>
+  <?php include __DIR__ . '/booking_modals.php'; ?>
 
+  <script src="scriptdashboard.js"></script>
 </body>
 </html>

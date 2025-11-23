@@ -1,21 +1,22 @@
 <?php
+ini_set('display_errors', 0);
+error_reporting(0);
+
 session_start();
 include '../config/config.php';
 
-header('Content-Type: application/json');
-
 // Check if admin
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    $_SESSION['error_message'] = 'Unauthorized access.';
+    header('Location: dashboard.php');
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-
-$bookingId = $data['bookingId'];
+$bookingId = $_POST['bookingId'] ?? null;
 
 if (!$bookingId) {
-    echo json_encode(['success' => false, 'message' => 'Missing booking ID']);
+    $_SESSION['error_message'] = 'Missing booking ID.';
+    header('Location: dashboard.php');
     exit;
 }
 
@@ -23,11 +24,22 @@ if (!$bookingId) {
 $query = $connection->prepare("
     UPDATE orders SET status = 'cancelled' WHERE id = ?
 ");
+if (!$query) {
+    $_SESSION['error_message'] = 'Prepare failed: ' . $connection->error;
+    header('Location: dashboard.php');
+    exit;
+}
 $query->bind_param("i", $bookingId);
 
 if ($query->execute()) {
-    echo json_encode(['success' => true]);
+    $_SESSION['success_message'] = 'Booking cancelled successfully.';
+    $query->close();
+    header('Location: dashboard.php');
+    exit;
 } else {
-    echo json_encode(['success' => false, 'message' => 'Failed to cancel booking']);
+    $_SESSION['error_message'] = 'Failed to cancel booking: ' . $query->error;
+    $query->close();
+    header('Location: dashboard.php');
+    exit;
 }
 ?>
